@@ -31,52 +31,52 @@ func (h Generator) Systems() *string {
 	return h.generate("systems")
 }
 
-func (h Generator) System(system_id string) *string {
-	return h.generate("systems", system_id)
+func (h Generator) System(systemID string) *string {
+	return h.generate("systems", systemID)
 }
 
-func (h Generator) AgenciesInSystem(system_id string) *string {
-	return h.generate("systems", system_id, "agencies")
+func (h Generator) AgenciesInSystem(systemID string) *string {
+	return h.generate("systems", systemID, "agencies")
 }
 
-func (h Generator) FeedsInSystem(system_id string) *string {
-	return h.generate("systems", system_id, "feeds")
+func (h Generator) FeedsInSystem(systemID string) *string {
+	return h.generate("systems", systemID, "feeds")
 }
 
-func (h Generator) RoutesInSystem(system_id string) *string {
-	return h.generate("systems", system_id, "routes")
+func (h Generator) RoutesInSystem(systemID string) *string {
+	return h.generate("systems", systemID, "routes")
 }
 
-func (h Generator) StopsInSystem(system_id string) *string {
-	return h.generate("systems", system_id, "stops")
+func (h Generator) StopsInSystem(systemID string) *string {
+	return h.generate("systems", systemID, "stops")
 }
 
-func (h Generator) TransfersInSystem(system_id string) *string {
-	return h.generate("systems", system_id, "transfers")
+func (h Generator) TransfersInSystem(systemID string) *string {
+	return h.generate("systems", systemID, "transfers")
 }
 
-func (h Generator) Agency(system_id string, agency_id string) *string {
-	return h.generate("systems", system_id, "agencies", agency_id)
+func (h Generator) Agency(systemID string, agencyID string) *string {
+	return h.generate("systems", systemID, "agencies", agencyID)
 }
 
-func (h Generator) Feed(system_id string, feed_id string) *string {
-	return h.generate("systems", system_id, "feeds", feed_id)
+func (h Generator) Feed(systemID string, feedID string) *string {
+	return h.generate("systems", systemID, "feeds", feedID)
 }
 
-func (h Generator) FeedUpdates(system_id string, feed_id string) *string {
-	return h.generate("systems", system_id, "feeds", feed_id, "updates")
+func (h Generator) FeedUpdates(systemID string, feedID string) *string {
+	return h.generate("systems", systemID, "feeds", feedID, "updates")
 }
 
-func (h Generator) Route(system_id string, route_id string) *string {
-	return h.generate("systems", system_id, "routes", route_id)
+func (h Generator) Route(systemID string, routeID string) *string {
+	return h.generate("systems", systemID, "routes", routeID)
 }
 
-func (h Generator) Trip(system_id string, route_id string, trip_id string) *string {
-	return h.generate("systems", system_id, "routes", route_id, "trips", trip_id)
+func (h Generator) Trip(systemID string, routeID string, tripID string) *string {
+	return h.generate("systems", systemID, "routes", routeID, "trips", tripID)
 }
 
-func (h Generator) Stop(system_id string, stop_id string) *string {
-	return h.generate("systems", system_id, "stops", stop_id)
+func (h Generator) Stop(systemID string, stop_id string) *string {
+	return h.generate("systems", systemID, "stops", stop_id)
 }
 
 func (h Generator) generate(elem ...string) *string {
