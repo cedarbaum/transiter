@@ -29,6 +29,7 @@ jobs:
         with:
           tags: jamespfennell/transiter:latest
           outputs: type=docker
+          context: .
 
       - name: End-to-end tests (setup)
         run: docker-compose -f tests/endtoend/compose.yml up --build --detach sourceserver transiter db
