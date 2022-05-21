@@ -63,7 +63,7 @@ func RunInExistingTx(ctx context.Context, querier db.Querier, systemId string, u
 		log.Printf("Error update for pk=%d\n", updatePk)
 		return err
 	}
-	feedConfig, err := config.UnmarshalFromJson([]byte(feed.Config))
+	feedConfig, err := config.UnmarshalFromJSON([]byte(feed.Config))
 	if err != nil {
 		return fmt.Errorf("failed to parse feed config in the DB: %w", err)
 	}
@@ -103,14 +103,14 @@ func getFeedContent(ctx context.Context, systemId string, feedConfig *config.Fee
 	client := http.Client{
 		Timeout: 5 * time.Second,
 	}
-	if feedConfig.HttpTimeout != nil {
-		client.Timeout = *feedConfig.HttpTimeout
+	if feedConfig.HTTPTimeout != nil {
+		client.Timeout = *feedConfig.HTTPTimeout
 	}
-	req, err := http.NewRequestWithContext(ctx, "GET", feedConfig.Url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", feedConfig.URL, nil)
 	if err != nil {
 		return nil, err
 	}
-	for key, value := range feedConfig.HttpHeaders {
+	for key, value := range feedConfig.HTTPHeaders {
 		req.Header.Add(key, value)
 	}
 	resp, err := client.Do(req)
@@ -119,7 +119,7 @@ func getFeedContent(ctx context.Context, systemId string, feedConfig *config.Fee
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP request for %s/%s returned non-ok status %s", systemId, feedConfig.Id, resp.Status)
+		return nil, fmt.Errorf("HTTP request for %s/%s returned non-ok status %s", systemId, feedConfig.ID, resp.Status)
 	}
 	return io.ReadAll(resp.Body)
 }

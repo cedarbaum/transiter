@@ -75,7 +75,7 @@ func (s *Service) InstallOrUpdateSystem(ctx context.Context, req *api.InstallOrU
 	var systemConfig *config.SystemConfig
 	switch c := req.GetConfig().(type) {
 	case *api.InstallOrUpdateSystemRequest_SystemConfig:
-		systemConfig = config.ConvertApiSystemConfig(c.SystemConfig)
+		systemConfig = config.ConvertAPISystemConfig(c.SystemConfig)
 	case *api.InstallOrUpdateSystemRequest_YamlConfig:
 		var rawConfig []byte
 		switch s := c.YamlConfig.Source.(type) {
@@ -204,28 +204,28 @@ func performSystemInstall(ctx context.Context, querier db.Querier, systemId stri
 	}
 
 	for _, newFeed := range config.Feeds {
-		if pk, ok := feedIdToPk[newFeed.Id]; ok {
+		if pk, ok := feedIdToPk[newFeed.ID]; ok {
 			if err := querier.UpdateFeed(ctx, db.UpdateFeedParams{
 				FeedPk:                pk,
 				PeriodicUpdateEnabled: newFeed.PeriodicUpdateEnabled,
 				PeriodicUpdatePeriod:  convertNullDuration(newFeed.PeriodicUpdatePeriod),
-				Config:                string(newFeed.MarshalToJson()),
+				Config:                string(newFeed.MarshalToJSON()),
 			}); err != nil {
 				return err
 			}
-			delete(feedIdToPk, newFeed.Id)
+			delete(feedIdToPk, newFeed.ID)
 		} else {
 			// TODO: is there a lint to detect not handling the error here?
 			querier.InsertFeed(ctx, db.InsertFeedParams{
-				ID:                    newFeed.Id,
+				ID:                    newFeed.ID,
 				SystemPk:              system.Pk,
 				PeriodicUpdateEnabled: newFeed.PeriodicUpdateEnabled,
 				PeriodicUpdatePeriod:  convertNullDuration(newFeed.PeriodicUpdatePeriod),
-				Config:                string(newFeed.MarshalToJson()),
+				Config:                string(newFeed.MarshalToJSON()),
 			})
 		}
 		if newFeed.RequiredForInstall {
-			if err := update.CreateAndRunInExistingTx(ctx, querier, systemId, newFeed.Id); err != nil {
+			if err := update.CreateAndRunInExistingTx(ctx, querier, systemId, newFeed.ID); err != nil {
 				return err
 			}
 		}

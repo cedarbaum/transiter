@@ -25,21 +25,21 @@ func UpdateConfig(ctx context.Context, querier db.Querier, systemPk int64, confi
 		configIdToPk[config.ID] = config.Pk
 	}
 	for _, newConfig := range configs {
-		if pk, ok := configIdToPk[newConfig.Id]; ok {
+		if pk, ok := configIdToPk[newConfig.ID]; ok {
 			if err := querier.UpdateServiceMapConfig(ctx, db.UpdateServiceMapConfigParams{
 				Pk:                     pk,
-				Config:                 newConfig.MarshalToJson(),
+				Config:                 newConfig.MarshalToJSON(),
 				DefaultForRoutesAtStop: newConfig.DefaultForRoutesAtStop,
 				DefaultForStopsInRoute: newConfig.DefaultForStopsInRoute,
 			}); err != nil {
 				return err
 			}
-			delete(configIdToPk, newConfig.Id)
+			delete(configIdToPk, newConfig.ID)
 		} else {
 			if err := querier.InsertServiceMapConfig(ctx, db.InsertServiceMapConfigParams{
-				ID:                     newConfig.Id,
+				ID:                     newConfig.ID,
 				SystemPk:               systemPk,
-				Config:                 newConfig.MarshalToJson(),
+				Config:                 newConfig.MarshalToJSON(),
 				DefaultForRoutesAtStop: newConfig.DefaultForRoutesAtStop,
 				DefaultForStopsInRoute: newConfig.DefaultForStopsInRoute,
 			}); err != nil {
@@ -74,7 +74,7 @@ func UpdateStaticMaps(ctx context.Context, querier db.Querier, args UpdateStatic
 	}
 
 	for _, smc := range configs {
-		if smc.Config.Source != config.SERVICE_MAP_SOURCE_STATIC {
+		if smc.Config.Source != config.ServiceMapSourceStatic {
 			continue
 		}
 		routePkToStopPks := buildStaticMaps(&smc.Config, args.RouteIdToPk, stopIdToStationPk, args.Trips)
@@ -215,7 +215,7 @@ func UpdateRealtimeMaps(ctx context.Context, querier db.Querier, args UpdateReal
 		return err
 	}
 	for _, smc := range configs {
-		if smc.Config.Source != config.SERVICE_MAP_SOURCE_REALTIME {
+		if smc.Config.Source != config.ServiceMapSourceRealtime {
 			continue
 		}
 		if err := persistMaps(ctx, querier, &smc, routePkToStopPks); err != nil {
