@@ -10,7 +10,7 @@ import (
 
 type Generator struct {
 	enabled bool
-	baseUrl string
+	baseURL string
 }
 
 // TODO(APIv2): rename X-Transiter-BaseURL
@@ -20,8 +20,8 @@ var xTransiterHostLower = strings.ToLower(XTransiterHost)
 
 func NewGenerator(ctx context.Context) Generator {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		if baseUrl, ok := md[xTransiterHostLower]; ok {
-			return Generator{enabled: true, baseUrl: baseUrl[0]}
+		if baseURL, ok := md[xTransiterHostLower]; ok {
+			return Generator{enabled: true, baseURL: baseURL[0]}
 		}
 	}
 	return Generator{}
@@ -75,14 +75,14 @@ func (h Generator) Trip(systemID string, routeID string, tripID string) *string 
 	return h.generate("systems", systemID, "routes", routeID, "trips", tripID)
 }
 
-func (h Generator) Stop(systemID string, stop_id string) *string {
-	return h.generate("systems", systemID, "stops", stop_id)
+func (h Generator) Stop(systemID string, stopID string) *string {
+	return h.generate("systems", systemID, "stops", stopID)
 }
 
 func (h Generator) generate(elem ...string) *string {
 	if !h.enabled {
 		return nil
 	}
-	res := h.baseUrl + "/" + path.Join(elem...)
+	res := h.baseURL + "/" + path.Join(elem...)
 	return &res
 }
