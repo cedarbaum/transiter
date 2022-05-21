@@ -49,7 +49,7 @@ func updateTrips(ctx context.Context, updateCtx common.UpdateContext, trips []gt
 			continue
 		}
 
-		uid := dbwrappers.TripUID{RoutePk: routePk, Id: trip.ID.ID}
+		uid := dbwrappers.TripUID{RoutePk: routePk, ID: trip.ID.ID}
 		if processedIds[uid] {
 			continue
 		}
@@ -193,7 +193,7 @@ func updateTrips(ctx context.Context, updateCtx common.UpdateContext, trips []gt
 		}
 		oldServiceMapTrips = append(oldServiceMapTrips, servicemaps.Trip{
 			RoutePk:     trip.RoutePk,
-			DirectionId: trip.DirectionId,
+			DirectionId: trip.DirectionID,
 			StopPks:     stopPks,
 		})
 	}

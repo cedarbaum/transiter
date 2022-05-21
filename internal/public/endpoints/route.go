@@ -128,8 +128,8 @@ func GetRouteInSystem(ctx context.Context, r *Context, req *api.GetRouteInSystem
 			Cause:  alert.Cause,
 			Effect: alert.Effect,
 			ActivePeriod: &api.Alert_ActivePeriod{
-				StartsAt: convert.SqlNullTime(alert.StartsAt),
-				EndsAt:   convert.SqlNullTime(alert.EndsAt),
+				StartsAt: convert.SQLNullTime(alert.StartsAt),
+				EndsAt:   convert.SQLNullTime(alert.EndsAt),
 			},
 		}
 		for _, message := range alertMessages {
@@ -139,8 +139,8 @@ func GetRouteInSystem(ctx context.Context, r *Context, req *api.GetRouteInSystem
 			apiAlert.Messages = append(apiAlert.Messages, &api.Alert_Message{
 				Header:      message.Header,
 				Description: message.Description,
-				Url:         convert.SqlNullString(message.Url),
-				Language:    convert.SqlNullString(message.Language),
+				Url:         convert.SQLNullString(message.Url),
+				Language:    convert.SQLNullString(message.Language),
 			})
 		}
 		alertsReply = append(alertsReply, &apiAlert)
@@ -148,13 +148,13 @@ func GetRouteInSystem(ctx context.Context, r *Context, req *api.GetRouteInSystem
 
 	reply := &api.Route{
 		Id:                route.ID,
-		ShortName:         convert.SqlNullString(route.ShortName),
-		LongName:          convert.SqlNullString(route.LongName),
+		ShortName:         convert.SQLNullString(route.ShortName),
+		LongName:          convert.SQLNullString(route.LongName),
 		Color:             route.Color,
 		TextColor:         route.TextColor,
-		Description:       convert.SqlNullString(route.Description),
-		Url:               convert.SqlNullString(route.Url),
-		SortOrder:         convert.SqlNullInt32(route.SortOrder),
+		Description:       convert.SQLNullString(route.Description),
+		Url:               convert.SQLNullString(route.Url),
+		SortOrder:         convert.SQLNullInt32(route.SortOrder),
 		ContinuousPickup:  route.ContinuousPickup,
 		ContinuousDropOff: route.ContinuousDropOff,
 		Type:              route.Type,

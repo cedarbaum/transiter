@@ -37,10 +37,10 @@ func TestScheduler(t *testing.T) {
 			description: "just change periodicity of one feed",
 			update: []SystemConfig{
 				{
-					Id: systemID1,
+					ID: systemID1,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedID1,
+							ID:     feedID1,
 							Period: 1000 * time.Millisecond,
 						},
 					},
@@ -56,14 +56,14 @@ func TestScheduler(t *testing.T) {
 			description: "new feed in same system",
 			update: []SystemConfig{
 				{
-					Id: systemID1,
+					ID: systemID1,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedID1,
+							ID:     feedID1,
 							Period: 500 * time.Millisecond,
 						},
 						{
-							Id:     feedID2,
+							ID:     feedID2,
 							Period: 500 * time.Millisecond,
 						},
 					},
@@ -80,7 +80,7 @@ func TestScheduler(t *testing.T) {
 			description: "remove feed in system",
 			update: []SystemConfig{
 				{
-					Id:          systemID1,
+					ID:          systemID1,
 					FeedConfigs: []FeedConfig{},
 				},
 			},
@@ -99,19 +99,19 @@ func TestScheduler(t *testing.T) {
 			description: "new system, only reset the new one",
 			update: []SystemConfig{
 				{
-					Id: systemID1,
+					ID: systemID1,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedID1,
+							ID:     feedID1,
 							Period: 500 * time.Millisecond,
 						},
 					},
 				},
 				{
-					Id: systemID2,
+					ID: systemID2,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedID3,
+							ID:     feedID3,
 							Period: 500 * time.Millisecond,
 						},
 					},
@@ -128,19 +128,19 @@ func TestScheduler(t *testing.T) {
 			description: "new system, reset all",
 			update: []SystemConfig{
 				{
-					Id: systemID1,
+					ID: systemID1,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedID1,
+							ID:     feedID1,
 							Period: 500 * time.Millisecond,
 						},
 					},
 				},
 				{
-					Id: systemID2,
+					ID: systemID2,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedID3,
+							ID:     feedID3,
 							Period: 500 * time.Millisecond,
 						},
 					},
@@ -162,10 +162,10 @@ func TestScheduler(t *testing.T) {
 			ops := testOps{
 				currentConfig: []SystemConfig{
 					{
-						Id: systemID1,
+						ID: systemID1,
 						FeedConfigs: []FeedConfig{
 							{
-								Id:     feedID1,
+								ID:     feedID1,
 								Period: 500 * time.Millisecond,
 							},
 						},
@@ -234,11 +234,11 @@ func (ops *testOps) ListSystemConfigs(ctx context.Context) ([]SystemConfig, erro
 
 func (ops *testOps) GetSystemConfig(ctx context.Context, systemID string) (SystemConfig, error) {
 	for _, config := range ops.currentConfig {
-		if config.Id == systemID {
+		if config.ID == systemID {
 			return config, nil
 		}
 	}
-	return SystemConfig{Id: systemID}, nil
+	return SystemConfig{ID: systemID}, nil
 }
 
 func (ops *testOps) UpdateFeed(ctx context.Context, systemID, feedID string) error {

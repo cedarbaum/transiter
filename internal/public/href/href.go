@@ -13,6 +13,8 @@ type Generator struct {
 	baseURL string
 }
 
+// XTransiterHost is the key of the HTTP header whose value is used as the base URL in all link values.
+//
 // TODO(APIv2): rename X-Transiter-BaseURL
 const XTransiterHost = "X-Transiter-Host"
 

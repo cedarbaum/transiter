@@ -46,7 +46,7 @@ func ListTripsInRoute(ctx context.Context, r *Context, req *api.ListTripsInRoute
 		api_trip := &api.TripPreviewWithAlerts{
 			Id:          trip.ID,
 			DirectionId: trip.DirectionID.Bool,
-			StartedAt:   convert.SqlNullTime(trip.StartedAt),
+			StartedAt:   convert.SQLNullTime(trip.StartedAt),
 			LastStop: &api.StopPreview{
 				Id:   lastStop.ID,
 				Name: lastStop.Name.String,
@@ -81,7 +81,7 @@ func GetTrip(ctx context.Context, r *Context, req *api.GetTripRequest) (*api.Tri
 	reply := &api.Trip{
 		Id:          trip.ID,
 		DirectionId: trip.DirectionID.Bool,
-		StartedAt:   convert.SqlNullTime(trip.StartedAt),
+		StartedAt:   convert.SQLNullTime(trip.StartedAt),
 		Route: &api.RoutePreview{
 			Id:    trip.RouteID,
 			Color: trip.RouteColor,
@@ -97,7 +97,7 @@ func GetTrip(ctx context.Context, r *Context, req *api.GetTripRequest) (*api.Tri
 	for _, stopTime := range stopTimes {
 		reply.StopTimes = append(reply.StopTimes, &api.Trip_StopTime{
 			StopSequence: stopTime.StopSequence,
-			Track:        convert.SqlNullString(stopTime.Track),
+			Track:        convert.SQLNullString(stopTime.Track),
 			Future:       !stopTime.Past,
 			Arrival:      buildEstimatedTime(stopTime.ArrivalTime, stopTime.ArrivalDelay, stopTime.ArrivalUncertainty),
 			Departure:    buildEstimatedTime(stopTime.DepartureTime, stopTime.DepartureDelay, stopTime.DepartureUncertainty),

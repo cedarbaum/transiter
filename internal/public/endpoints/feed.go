@@ -74,11 +74,11 @@ func ListFeedUpdates(ctx context.Context, r *Context, req *api.ListFeedUpdatesRe
 		reply.Updates = append(reply.Updates, &api.FeedUpdate{
 			Id:            fmt.Sprintf("%d", update.Pk),
 			Status:        update.Status,
-			Result:        convert.SqlNullString(update.Result),
-			StackTrace:    convert.SqlNullString(update.ResultMessage),
-			ContentHash:   convert.SqlNullString(update.ContentHash),
-			ContentLength: convert.SqlNullInt32(update.ContentLength),
-			CompletedAt:   convert.SqlNullTime(update.CompletedAt),
+			Result:        convert.SQLNullString(update.Result),
+			StackTrace:    convert.SQLNullString(update.ResultMessage),
+			ContentHash:   convert.SQLNullString(update.ContentHash),
+			ContentLength: convert.SQLNullInt32(update.ContentLength),
+			CompletedAt:   convert.SQLNullTime(update.CompletedAt),
 		})
 	}
 	return reply, nil

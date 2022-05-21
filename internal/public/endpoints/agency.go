@@ -63,10 +63,10 @@ func GetAgencyInSystem(ctx context.Context, r *Context, req *api.GetAgencyInSyst
 		Name:     agency.Name,
 		Url:      agency.Url,
 		Timezone: agency.Timezone,
-		Language: convert.SqlNullString(agency.Language),
-		Phone:    convert.SqlNullString(agency.Phone),
-		FareUrl:  convert.SqlNullString(agency.FareUrl),
-		Email:    convert.SqlNullString(agency.Email),
+		Language: convert.SQLNullString(agency.Language),
+		Phone:    convert.SQLNullString(agency.Phone),
+		FareUrl:  convert.SQLNullString(agency.FareUrl),
+		Email:    convert.SQLNullString(agency.Email),
 	}
 	for _, route := range routes {
 		reply.Routes = append(reply.Routes, &api.RoutePreview{

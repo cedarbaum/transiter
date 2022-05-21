@@ -43,12 +43,12 @@ import (
 )
 
 type SystemConfig struct {
-	Id          string
+	ID          string
 	FeedConfigs []FeedConfig
 }
 
 type FeedConfig struct {
-	Id     string
+	ID     string
 	Period time.Duration
 }
 
@@ -114,7 +114,7 @@ func (ops *defaultSchedulerOps) UpdateFeed(ctx context.Context, systemID, feedID
 }
 
 func buildSystemConfig(ctx context.Context, querier db.Querier, systemID string) (SystemConfig, error) {
-	systemConfig := SystemConfig{Id: systemID}
+	systemConfig := SystemConfig{ID: systemID}
 	feeds, err := querier.ListAutoUpdateFeedsForSystem(ctx, systemID)
 	if err != nil {
 		return SystemConfig{}, err
@@ -125,7 +125,7 @@ func buildSystemConfig(ctx context.Context, querier db.Querier, systemID string)
 			period = time.Millisecond * time.Duration(feed.PeriodicUpdatePeriod.Int32)
 		}
 		systemConfig.FeedConfigs = append(systemConfig.FeedConfigs, FeedConfig{
-			Id:     feed.ID,
+			ID:     feed.ID,
 			Period: period,
 		})
 	}
@@ -206,8 +206,8 @@ func (s *Scheduler) RunWithClockAndOps(ctx context.Context, clock clock.Clock, o
 			log.Printf("Reseting scheduler")
 			updatedSystemIds := map[string]bool{}
 			for _, systemMsg := range msg {
-				updatedSystemIds[systemMsg.Id] = true
-				resetScheduler(systemMsg.Id, systemMsg.FeedConfigs)
+				updatedSystemIds[systemMsg.ID] = true
+				resetScheduler(systemMsg.ID, systemMsg.FeedConfigs)
 			}
 			for systemID := range systemSchedulers {
 				if updatedSystemIds[systemID] {
@@ -223,9 +223,9 @@ func (s *Scheduler) RunWithClockAndOps(ctx context.Context, clock clock.Clock, o
 				break
 			}
 			if len(msg.FeedConfigs) == 0 {
-				stopScheduler(msg.Id)
+				stopScheduler(msg.ID)
 			} else {
-				resetScheduler(msg.Id, msg.FeedConfigs)
+				resetScheduler(msg.ID, msg.FeedConfigs)
 			}
 			s.resetReply <- nil
 		case <-s.statusRequest:
@@ -261,8 +261,8 @@ func (s *Scheduler) Reset(ctx context.Context, systemID string) error {
 }
 
 type FeedStatus struct {
-	SystemId             string
-	FeedId               string
+	SystemID             string
+	FeedID               string
 	Period               time.Duration
 	LastFinishedUpdate   time.Time
 	LastSuccessfulUpdate time.Time
@@ -273,10 +273,10 @@ func (s *Scheduler) Status() []FeedStatus {
 	s.statusRequest <- struct{}{}
 	feeds := <-s.statusReply
 	sort.Slice(feeds, func(i, j int) bool {
-		if feeds[i].SystemId == feeds[j].SystemId {
-			return feeds[i].FeedId < feeds[j].FeedId
+		if feeds[i].SystemID == feeds[j].SystemID {
+			return feeds[i].FeedID < feeds[j].FeedID
 		}
-		return feeds[i].SystemId < feeds[j].SystemId
+		return feeds[i].SystemID < feeds[j].SystemID
 	})
 	return feeds
 }
@@ -321,18 +321,18 @@ func (s *systemScheduler) run(ctx context.Context, clock clock.Clock, ops Ops, s
 		case msg := <-s.resetRequest:
 			updatedFeedIds := map[string]bool{}
 			for _, feed := range msg {
-				updatedFeedIds[feed.Id] = true
-				if _, ok := feedSchedulers[feed.Id]; !ok {
+				updatedFeedIds[feed.ID] = true
+				if _, ok := feedSchedulers[feed.ID]; !ok {
 					feedCtx, cancelFunc := context.WithCancel(ctx)
-					feedSchedulers[feed.Id] = struct {
+					feedSchedulers[feed.ID] = struct {
 						scheduler  *feedScheduler
 						cancelFunc context.CancelFunc
 					}{
-						scheduler:  newFeedScheduler(feedCtx, clock, ops, systemID, feed.Id),
+						scheduler:  newFeedScheduler(feedCtx, clock, ops, systemID, feed.ID),
 						cancelFunc: cancelFunc,
 					}
 				}
-				feedSchedulers[feed.Id].scheduler.reset(feed.Period)
+				feedSchedulers[feed.ID].scheduler.reset(feed.Period)
 			}
 			for feedID, fs := range feedSchedulers {
 				if updatedFeedIds[feedID] {
@@ -433,8 +433,8 @@ func (fs *feedScheduler) run(ctx context.Context, clock clock.Clock, ops Ops, sy
 			updateRunning = false
 		case <-fs.statusRequest:
 			fs.statusReply <- FeedStatus{
-				SystemId:             systemID,
-				FeedId:               feedID,
+				SystemID:             systemID,
+				FeedID:               feedID,
 				CurrentlyRunning:     updateRunning,
 				LastFinishedUpdate:   lastFinishedUpdate,
 				LastSuccessfulUpdate: lastSuccesfulUpdate,
