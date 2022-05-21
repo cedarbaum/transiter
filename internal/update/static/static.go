@@ -32,7 +32,7 @@ func Update(ctx context.Context, updateCtx common.UpdateContext, parsedEntities 
 	if err := servicemaps.UpdateStaticMaps(ctx, updateCtx.Querier, servicemaps.UpdateStaticMapsArgs{
 		SystemPk:    updateCtx.SystemPk,
 		Trips:       parsedEntities.Trips,
-		RouteIdToPk: routeIDToPk,
+		RouteIDToPk: routeIDToPk,
 	}); err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func updateAgencies(ctx context.Context, updateCtx common.UpdateContext, agencie
 }
 
 func updateRoutes(ctx context.Context, updateCtx common.UpdateContext, routes []gtfs.Route, agencyIdToPk map[string]int64) (map[string]int64, error) {
-	idToPk, err := buildRouteIdToPkMap(ctx, updateCtx.Querier, updateCtx.SystemPk)
+	idToPk, err := buildRouteIDToPkMap(ctx, updateCtx.Querier, updateCtx.SystemPk)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func updateRoutes(ctx context.Context, updateCtx common.UpdateContext, routes []
 }
 
 func updateStops(ctx context.Context, updateCtx common.UpdateContext, stops []*gtfs.Stop) (map[string]int64, error) {
-	idToPk, err := buildStopIdToPkMap(ctx, updateCtx.Querier, updateCtx.SystemPk)
+	idToPk, err := buildStopIDToPkMap(ctx, updateCtx.Querier, updateCtx.SystemPk)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +275,7 @@ func buildAgencyIdToPkMap(ctx context.Context, querier db.Querier, systemPk int6
 	return idToPk, nil
 }
 
-func buildRouteIdToPkMap(ctx context.Context, querier db.Querier, systemPk int64) (map[string]int64, error) {
+func buildRouteIDToPkMap(ctx context.Context, querier db.Querier, systemPk int64) (map[string]int64, error) {
 	idToPk := map[string]int64{}
 	rows, err := querier.MapRoutePkToIdInSystem(ctx, systemPk)
 	if err != nil {
@@ -287,7 +287,7 @@ func buildRouteIdToPkMap(ctx context.Context, querier db.Querier, systemPk int64
 	return idToPk, nil
 }
 
-func buildStopIdToPkMap(ctx context.Context, querier db.Querier, systemPk int64) (map[string]int64, error) {
+func buildStopIDToPkMap(ctx context.Context, querier db.Querier, systemPk int64) (map[string]int64, error) {
 	idToPk := map[string]int64{}
 	rows, err := querier.MapStopPkToIdInSystem(ctx, systemPk)
 	if err != nil {

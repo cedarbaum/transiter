@@ -22,11 +22,11 @@ func Update(ctx context.Context, updateCtx common.UpdateContext, parsedEntities 
 func updateTrips(ctx context.Context, updateCtx common.UpdateContext, trips []gtfs.Trip) error {
 	// ASSUMPTIONS: route ID is populated. If not, get it from the static data in an earlier phase
 
-	stopIDToPk, err := dbwrappers.MapStopIdToPkInSystem(ctx, updateCtx.Querier, updateCtx.SystemPk, stopIDsInTrips(trips))
+	stopIDToPk, err := dbwrappers.MapStopIDToPkInSystem(ctx, updateCtx.Querier, updateCtx.SystemPk, stopIDsInTrips(trips))
 	if err != nil {
 		return err
 	}
-	routeIDToPk, err := dbwrappers.MapRouteIdToPkInSystem(ctx, updateCtx.Querier, updateCtx.SystemPk, routeIDsInTrips(trips))
+	routeIDToPk, err := dbwrappers.MapRouteIDToPkInSystem(ctx, updateCtx.Querier, updateCtx.SystemPk, routeIDsInTrips(trips))
 	if err != nil {
 		return err
 	}

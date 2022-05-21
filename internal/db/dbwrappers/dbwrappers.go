@@ -10,8 +10,8 @@ import (
 	"github.com/jamespfennell/transiter/internal/gen/db"
 )
 
-func MapStopIdToStationPk(ctx context.Context, querier db.Querier, systemPk int64) (map[string]int64, error) {
-	rows, err := querier.MapStopIdToStationPk(ctx, systemPk)
+func MapStopIDToStationPk(ctx context.Context, querier db.Querier, systemPk int64) (map[string]int64, error) {
+	rows, err := querier.MapStopIDToStationPk(ctx, systemPk)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func MapStopPkToStationPk(ctx context.Context, querier db.Querier, stopPks []int
 	return result, nil
 }
 
-func MapStopIdToPkInSystem(ctx context.Context, querier db.Querier, systemPk int64, stopIDs []string) (map[string]int64, error) {
+func MapStopIDToPkInSystem(ctx context.Context, querier db.Querier, systemPk int64, stopIDs []string) (map[string]int64, error) {
 	rows, err := querier.MapStopsInSystem(ctx, db.MapStopsInSystemParams{
 		SystemPk: systemPk,
 		StopIds:  stopIDs,
@@ -49,7 +49,7 @@ func MapStopIdToPkInSystem(ctx context.Context, querier db.Querier, systemPk int
 	return result, nil
 }
 
-func MapRouteIdToPkInSystem(ctx context.Context, querier db.Querier, systemPk int64, routeIDs []string) (map[string]int64, error) {
+func MapRouteIDToPkInSystem(ctx context.Context, querier db.Querier, systemPk int64, routeIDs []string) (map[string]int64, error) {
 	rows, err := querier.MapRoutesInSystem(ctx, db.MapRoutesInSystemParams{
 		SystemPk: systemPk,
 		RouteIds: routeIDs,

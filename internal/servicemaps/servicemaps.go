@@ -58,7 +58,7 @@ func UpdateConfig(ctx context.Context, querier db.Querier, systemPk int64, confi
 type UpdateStaticMapsArgs struct {
 	SystemPk    int64
 	Trips       []gtfs.ScheduledTrip
-	RouteIdToPk map[string]int64
+	RouteIDToPk map[string]int64
 }
 
 // UpdateStaticMaps updates the static service maps
@@ -68,7 +68,7 @@ func UpdateStaticMaps(ctx context.Context, querier db.Querier, args UpdateStatic
 		return err
 	}
 
-	stopIDToStationPk, err := dbwrappers.MapStopIdToStationPk(ctx, querier, args.SystemPk)
+	stopIDToStationPk, err := dbwrappers.MapStopIDToStationPk(ctx, querier, args.SystemPk)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func UpdateStaticMaps(ctx context.Context, querier db.Querier, args UpdateStatic
 		if smc.Config.Source != config.ServiceMapSourceStatic {
 			continue
 		}
-		routePkToStopPks := buildStaticMaps(&smc.Config, args.RouteIdToPk, stopIDToStationPk, args.Trips)
+		routePkToStopPks := buildStaticMaps(&smc.Config, args.RouteIDToPk, stopIDToStationPk, args.Trips)
 		if err := persistMaps(ctx, querier, &smc, routePkToStopPks); err != nil {
 			return err
 		}
