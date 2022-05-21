@@ -34,10 +34,10 @@ func MapStopPkToStationPk(ctx context.Context, querier db.Querier, stopPks []int
 	return result, nil
 }
 
-func MapStopIdToPkInSystem(ctx context.Context, querier db.Querier, systemPk int64, stopIds []string) (map[string]int64, error) {
+func MapStopIdToPkInSystem(ctx context.Context, querier db.Querier, systemPk int64, stopIDs []string) (map[string]int64, error) {
 	rows, err := querier.MapStopsInSystem(ctx, db.MapStopsInSystemParams{
 		SystemPk: systemPk,
-		StopIds:  stopIds,
+		StopIds:  stopIDs,
 	})
 	if err != nil {
 		return nil, err
@@ -49,10 +49,10 @@ func MapStopIdToPkInSystem(ctx context.Context, querier db.Querier, systemPk int
 	return result, nil
 }
 
-func MapRouteIdToPkInSystem(ctx context.Context, querier db.Querier, systemPk int64, routeIds []string) (map[string]int64, error) {
+func MapRouteIdToPkInSystem(ctx context.Context, querier db.Querier, systemPk int64, routeIDs []string) (map[string]int64, error) {
 	rows, err := querier.MapRoutesInSystem(ctx, db.MapRoutesInSystemParams{
 		SystemPk: systemPk,
-		RouteIds: routeIds,
+		RouteIds: routeIDs,
 	})
 	if err != nil {
 		return nil, err

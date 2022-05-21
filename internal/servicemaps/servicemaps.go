@@ -68,7 +68,7 @@ func UpdateStaticMaps(ctx context.Context, querier db.Querier, args UpdateStatic
 		return err
 	}
 
-	stopIdToStationPk, err := dbwrappers.MapStopIdToStationPk(ctx, querier, args.SystemPk)
+	stopIDToStationPk, err := dbwrappers.MapStopIdToStationPk(ctx, querier, args.SystemPk)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func UpdateStaticMaps(ctx context.Context, querier db.Querier, args UpdateStatic
 		if smc.Config.Source != config.ServiceMapSourceStatic {
 			continue
 		}
-		routePkToStopPks := buildStaticMaps(&smc.Config, args.RouteIdToPk, stopIdToStationPk, args.Trips)
+		routePkToStopPks := buildStaticMaps(&smc.Config, args.RouteIdToPk, stopIDToStationPk, args.Trips)
 		if err := persistMaps(ctx, querier, &smc, routePkToStopPks); err != nil {
 			return err
 		}
@@ -114,13 +114,13 @@ func persistMaps(ctx context.Context, querier db.Querier, smc *Config, routePkTo
 	return nil
 }
 
-func buildStaticMaps(smc *config.ServiceMapConfig, routeIdToPk map[string]int64, stopIdToStationPk map[string]int64, trips []gtfs.ScheduledTrip) map[int64][]int64 {
+func buildStaticMaps(smc *config.ServiceMapConfig, routeIDToPk map[string]int64, stopIDToStationPk map[string]int64, trips []gtfs.ScheduledTrip) map[int64][]int64 {
 	routePkToEdges := map[int64]map[graph.Edge]bool{}
-	for _, routePk := range routeIdToPk {
+	for _, routePk := range routeIDToPk {
 		routePkToEdges[routePk] = map[graph.Edge]bool{}
 	}
 	for _, trip := range trips {
-		routePk, ok := routeIdToPk[trip.Route.Id]
+		routePk, ok := routeIDToPk[trip.Route.Id]
 		if !ok {
 			continue
 		}
@@ -136,8 +136,8 @@ func buildStaticMaps(smc *config.ServiceMapConfig, routeIdToPk map[string]int64,
 			}
 			// TODO: what if the stop IDs don't exist?
 			routePkToEdges[routePk][graph.Edge{
-				FromLabel: stopIdToStationPk[trip.StopTimes[from].Stop.Id],
-				ToLabel:   stopIdToStationPk[trip.StopTimes[to].Stop.Id],
+				FromLabel: stopIDToStationPk[trip.StopTimes[from].Stop.Id],
+				ToLabel:   stopIDToStationPk[trip.StopTimes[to].Stop.Id],
 			}] = true
 		}
 	}

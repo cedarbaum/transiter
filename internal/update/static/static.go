@@ -18,21 +18,21 @@ func Update(ctx context.Context, updateCtx common.UpdateContext, parsedEntities 
 	if err != nil {
 		return err
 	}
-	routeIdToPk, err := updateRoutes(ctx, updateCtx, parsedEntities.Routes, agencyIdToPk)
+	routeIDToPk, err := updateRoutes(ctx, updateCtx, parsedEntities.Routes, agencyIdToPk)
 	if err != nil {
 		return err
 	}
-	stopIdToPk, err := updateStops(ctx, updateCtx, parsedEntities.AllStops())
+	stopIDToPk, err := updateStops(ctx, updateCtx, parsedEntities.AllStops())
 	if err != nil {
 		return err
 	}
-	if err := updateTransfers(ctx, updateCtx, parsedEntities.Transfers, stopIdToPk); err != nil {
+	if err := updateTransfers(ctx, updateCtx, parsedEntities.Transfers, stopIDToPk); err != nil {
 		return err
 	}
 	if err := servicemaps.UpdateStaticMaps(ctx, updateCtx.Querier, servicemaps.UpdateStaticMapsArgs{
 		SystemPk:    updateCtx.SystemPk,
 		Trips:       parsedEntities.Trips,
-		RouteIdToPk: routeIdToPk,
+		RouteIdToPk: routeIDToPk,
 	}); err != nil {
 		return err
 	}
@@ -233,7 +233,7 @@ func updateStops(ctx context.Context, updateCtx common.UpdateContext, stops []*g
 	return idToPk, nil
 }
 
-func updateTransfers(ctx context.Context, updateCtx common.UpdateContext, transfers []gtfs.Transfer, stopIdToPk map[string]int64) error {
+func updateTransfers(ctx context.Context, updateCtx common.UpdateContext, transfers []gtfs.Transfer, stopIDToPk map[string]int64) error {
 	if err := updateCtx.Querier.DeleteStaleTransfers(ctx, db.DeleteStaleTransfersParams{
 		FeedPk:   updateCtx.FeedPk,
 		UpdatePk: updateCtx.UpdatePk,
@@ -241,11 +241,11 @@ func updateTransfers(ctx context.Context, updateCtx common.UpdateContext, transf
 		return err
 	}
 	for _, transfer := range transfers {
-		fromPk, ok := stopIdToPk[transfer.From.Id]
+		fromPk, ok := stopIDToPk[transfer.From.Id]
 		if !ok {
 			continue
 		}
-		toPk, ok := stopIdToPk[transfer.To.Id]
+		toPk, ok := stopIDToPk[transfer.To.Id]
 		if !ok {
 			continue
 		}

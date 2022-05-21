@@ -14,8 +14,8 @@ const (
 	URL          = "url"
 	HeaderKey    = "headerKey"
 	HeaderValue  = "headerValue"
-	StopID1      = "stopId1"
-	StopID2      = "stopId2"
+	StopID1      = "stopID1"
+	StopID2      = "stopID2"
 	ServiceMapID = "serviceMapId"
 )
 
