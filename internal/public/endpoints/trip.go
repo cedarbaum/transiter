@@ -43,7 +43,7 @@ func ListTripsInRoute(ctx context.Context, r *Context, req *api.ListTripsInRoute
 	for _, trip := range trips {
 		trip := trip
 		lastStop := tripPkToLastStop[trip.Pk]
-		api_trip := &api.TripPreviewWithAlerts{
+		apiTrip := &api.TripPreviewWithAlerts{
 			Id:          trip.ID,
 			DirectionId: trip.DirectionID.Bool,
 			StartedAt:   convert.SQLNullTime(trip.StartedAt),
@@ -55,11 +55,11 @@ func ListTripsInRoute(ctx context.Context, r *Context, req *api.ListTripsInRoute
 			Href: r.Href.Trip(req.SystemId, route.ID, trip.ID),
 		}
 		if trip.VehicleID.Valid {
-			api_trip.Vehicle = &api.VehiclePreview{
+			apiTrip.Vehicle = &api.VehiclePreview{
 				Id: trip.VehicleID.String,
 			}
 		}
-		reply.Trips = append(reply.Trips, api_trip)
+		reply.Trips = append(reply.Trips, apiTrip)
 	}
 	return reply, nil
 }

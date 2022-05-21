@@ -27,13 +27,13 @@ func ListFeedsInSystem(ctx context.Context, r *Context, req *api.ListFeedsInSyst
 	result := &api.ListFeedsInSystemReply{}
 	for _, feed := range feeds {
 		feed := feed
-		api_feed := &api.FeedPreview{
+		apiFeed := &api.FeedPreview{
 			Id:                    feed.ID,
 			PeriodicUpdateEnabled: feed.PeriodicUpdateEnabled,
 			PeriodicUpdatePeriod:  periodicUpdatePeriod(&feed),
 			Href:                  r.Href.Feed(system.ID, feed.ID),
 		}
-		result.Feeds = append(result.Feeds, api_feed)
+		result.Feeds = append(result.Feeds, apiFeed)
 	}
 	return result, nil
 }

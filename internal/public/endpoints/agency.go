@@ -27,13 +27,13 @@ func ListAgenciesInSystem(ctx context.Context, r *Context, req *api.ListAgencies
 	}
 	reply := &api.ListAgenciesInSystemReply{}
 	for _, agency := range agencies {
-		api_agency := &api.AgencyPreviewWithAlerts{
+		apiAgency := &api.AgencyPreviewWithAlerts{
 			Id:     agency.ID,
 			Name:   agency.Name,
 			Alerts: []string{},
 			Href:   r.Href.Agency(req.SystemId, agency.ID),
 		}
-		reply.Agencies = append(reply.Agencies, api_agency)
+		reply.Agencies = append(reply.Agencies, apiAgency)
 	}
 	return reply, nil
 }
