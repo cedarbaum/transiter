@@ -19,11 +19,11 @@ import (
 	"github.com/jamespfennell/transiter/internal/update/static"
 )
 
-func CreateAndRun(ctx context.Context, pool *pgxpool.Pool, systemID, feedId string) error {
+func CreateAndRun(ctx context.Context, pool *pgxpool.Pool, systemID, feedID string) error {
 	var updatePk int64
 	if err := pool.BeginTxFunc(ctx, pgx.TxOptions{}, func(tx pgx.Tx) error {
 		var err error
-		updatePk, err = CreateInExistingTx(ctx, db.New(tx), systemID, feedId)
+		updatePk, err = CreateInExistingTx(ctx, db.New(tx), systemID, feedID)
 		return err
 	}); err != nil {
 		return err
@@ -34,22 +34,22 @@ func CreateAndRun(ctx context.Context, pool *pgxpool.Pool, systemID, feedId stri
 	})
 }
 
-func CreateAndRunInExistingTx(ctx context.Context, querier db.Querier, systemID, feedId string) error {
-	updatePk, err := CreateInExistingTx(ctx, querier, systemID, feedId)
+func CreateAndRunInExistingTx(ctx context.Context, querier db.Querier, systemID, feedID string) error {
+	updatePk, err := CreateInExistingTx(ctx, querier, systemID, feedID)
 	if err != nil {
 		return err
 	}
 	return RunInExistingTx(ctx, querier, systemID, updatePk)
 }
 
-func CreateInExistingTx(ctx context.Context, querier db.Querier, systemID, feedId string) (int64, error) {
-	log.Printf("Creating update for %s/%s\n", systemID, feedId)
+func CreateInExistingTx(ctx context.Context, querier db.Querier, systemID, feedID string) (int64, error) {
+	log.Printf("Creating update for %s/%s\n", systemID, feedID)
 	feed, err := querier.GetFeedInSystem(ctx, db.GetFeedInSystemParams{
 		SystemID: systemID,
-		FeedID:   feedId,
+		FeedID:   feedID,
 	})
 	if err != nil {
-		return 0, errors.NewNotFoundError(fmt.Sprintf("unknown feed %s/%s", systemID, feedId))
+		return 0, errors.NewNotFoundError(fmt.Sprintf("unknown feed %s/%s", systemID, feedID))
 	}
 	return querier.InsertFeedUpdate(ctx, db.InsertFeedUpdateParams{
 		FeedPk: feed.Pk,

@@ -11,10 +11,10 @@ import (
 )
 
 const systemID1 = "systemID1"
-const feedId1 = "feedId1"
-const feedId2 = "feedId2"
+const feedID1 = "feedID1"
+const feedID2 = "feedID2"
 const systemID2 = "systemID2"
-const feedId3 = "feedId3"
+const feedID3 = "feedID3"
 
 func TestScheduler(t *testing.T) {
 	resetSystem1 := func(s *Scheduler) error {
@@ -40,7 +40,7 @@ func TestScheduler(t *testing.T) {
 					Id: systemID1,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedId1,
+							Id:     feedID1,
 							Period: 1000 * time.Millisecond,
 						},
 					},
@@ -49,7 +49,7 @@ func TestScheduler(t *testing.T) {
 			resetF:        resetSystem1,
 			runningPeriod: 2000 * time.Millisecond,
 			expectedUpdates: map[systemAndFeed]int{
-				{systemID: systemID1, feedId: feedId1}: 2,
+				{systemID: systemID1, feedID: feedID1}: 2,
 			},
 		},
 		{
@@ -59,11 +59,11 @@ func TestScheduler(t *testing.T) {
 					Id: systemID1,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedId1,
+							Id:     feedID1,
 							Period: 500 * time.Millisecond,
 						},
 						{
-							Id:     feedId2,
+							Id:     feedID2,
 							Period: 500 * time.Millisecond,
 						},
 					},
@@ -72,8 +72,8 @@ func TestScheduler(t *testing.T) {
 			resetF:        resetSystem1,
 			runningPeriod: 2000 * time.Millisecond,
 			expectedUpdates: map[systemAndFeed]int{
-				{systemID: systemID1, feedId: feedId1}: 4,
-				{systemID: systemID1, feedId: feedId2}: 4,
+				{systemID: systemID1, feedID: feedID1}: 4,
+				{systemID: systemID1, feedID: feedID2}: 4,
 			},
 		},
 		{
@@ -102,7 +102,7 @@ func TestScheduler(t *testing.T) {
 					Id: systemID1,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedId1,
+							Id:     feedID1,
 							Period: 500 * time.Millisecond,
 						},
 					},
@@ -111,7 +111,7 @@ func TestScheduler(t *testing.T) {
 					Id: systemID2,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedId3,
+							Id:     feedID3,
 							Period: 500 * time.Millisecond,
 						},
 					},
@@ -120,8 +120,8 @@ func TestScheduler(t *testing.T) {
 			resetF:        resetSystem2,
 			runningPeriod: 2000 * time.Millisecond,
 			expectedUpdates: map[systemAndFeed]int{
-				{systemID: systemID1, feedId: feedId1}: 4,
-				{systemID: systemID2, feedId: feedId3}: 4,
+				{systemID: systemID1, feedID: feedID1}: 4,
+				{systemID: systemID2, feedID: feedID3}: 4,
 			},
 		},
 		{
@@ -131,7 +131,7 @@ func TestScheduler(t *testing.T) {
 					Id: systemID1,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedId1,
+							Id:     feedID1,
 							Period: 500 * time.Millisecond,
 						},
 					},
@@ -140,7 +140,7 @@ func TestScheduler(t *testing.T) {
 					Id: systemID2,
 					FeedConfigs: []FeedConfig{
 						{
-							Id:     feedId3,
+							Id:     feedID3,
 							Period: 500 * time.Millisecond,
 						},
 					},
@@ -149,8 +149,8 @@ func TestScheduler(t *testing.T) {
 			resetF:        resetAll,
 			runningPeriod: 2000 * time.Millisecond,
 			expectedUpdates: map[systemAndFeed]int{
-				{systemID: systemID1, feedId: feedId1}: 4,
-				{systemID: systemID2, feedId: feedId3}: 4,
+				{systemID: systemID1, feedID: feedID1}: 4,
+				{systemID: systemID2, feedID: feedID3}: 4,
 			},
 		},
 	}
@@ -165,7 +165,7 @@ func TestScheduler(t *testing.T) {
 						Id: systemID1,
 						FeedConfigs: []FeedConfig{
 							{
-								Id:     feedId1,
+								Id:     feedID1,
 								Period: 500 * time.Millisecond,
 							},
 						},
@@ -190,7 +190,7 @@ func TestScheduler(t *testing.T) {
 
 			updates := ops.getUpdates(4)
 			expected := map[systemAndFeed]int{
-				{systemID: systemID1, feedId: feedId1}: 4,
+				{systemID: systemID1, feedID: feedID1}: 4,
 			}
 			if !reflect.DeepEqual(expected, updates) {
 				t.Errorf("Updates got = %+v, want = %+v", updates, expected)
@@ -241,8 +241,8 @@ func (ops *testOps) GetSystemConfig(ctx context.Context, systemID string) (Syste
 	return SystemConfig{Id: systemID}, nil
 }
 
-func (ops *testOps) UpdateFeed(ctx context.Context, systemID, feedId string) error {
-	ops.updateChan <- systemAndFeed{systemID: systemID, feedId: feedId}
+func (ops *testOps) UpdateFeed(ctx context.Context, systemID, feedID string) error {
+	ops.updateChan <- systemAndFeed{systemID: systemID, feedID: feedID}
 	return nil
 }
 
@@ -268,5 +268,5 @@ func (ops *testOps) getUpdates(num int) map[systemAndFeed]int {
 }
 
 type systemAndFeed struct {
-	systemID, feedId string
+	systemID, feedID string
 }

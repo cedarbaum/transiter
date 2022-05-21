@@ -97,10 +97,10 @@ func (c *Client) InstallSystem(ctx context.Context, args InstallSystemArgs) erro
 	}
 }
 
-func (c *Client) UpdateFeed(ctx context.Context, systemID, feedId string) error {
+func (c *Client) UpdateFeed(ctx context.Context, systemID, feedID string) error {
 	_, err := c.adminClient.UpdateFeed(ctx, &api.UpdateFeedRequest{
 		SystemId: systemID,
-		FeedId:   feedId,
+		FeedId:   feedID,
 	})
 	return err
 }

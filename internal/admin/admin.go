@@ -198,13 +198,13 @@ func performSystemInstall(ctx context.Context, querier db.Querier, systemID stri
 	if err != nil {
 		return err
 	}
-	feedIdToPk := map[string]int64{}
+	feedIDToPk := map[string]int64{}
 	for _, feed := range feeds {
-		feedIdToPk[feed.ID] = feed.Pk
+		feedIDToPk[feed.ID] = feed.Pk
 	}
 
 	for _, newFeed := range config.Feeds {
-		if pk, ok := feedIdToPk[newFeed.ID]; ok {
+		if pk, ok := feedIDToPk[newFeed.ID]; ok {
 			if err := querier.UpdateFeed(ctx, db.UpdateFeedParams{
 				FeedPk:                pk,
 				PeriodicUpdateEnabled: newFeed.PeriodicUpdateEnabled,
@@ -213,7 +213,7 @@ func performSystemInstall(ctx context.Context, querier db.Querier, systemID stri
 			}); err != nil {
 				return err
 			}
-			delete(feedIdToPk, newFeed.ID)
+			delete(feedIDToPk, newFeed.ID)
 		} else {
 			// TODO: is there a lint to detect not handling the error here?
 			querier.InsertFeed(ctx, db.InsertFeedParams{
@@ -230,7 +230,7 @@ func performSystemInstall(ctx context.Context, querier db.Querier, systemID stri
 			}
 		}
 	}
-	for _, pk := range feedIdToPk {
+	for _, pk := range feedIDToPk {
 		querier.DeleteFeed(ctx, pk)
 	}
 	return nil
