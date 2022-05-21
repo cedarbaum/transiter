@@ -1,3 +1,4 @@
+// Package href contains a facility for generating links to entities in the REST API.
 package href
 
 import (

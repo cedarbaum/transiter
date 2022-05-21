@@ -70,7 +70,7 @@ func main() {
 						return fmt.Errorf("must provide a URL or file path for the transit system Yaml config")
 					}
 					args := client.InstallSystemArgs{
-						SystemId:     c.Args().Get(0),
+						SystemID:     c.Args().Get(0),
 						ConfigPath:   c.Args().Get(1),
 						IsFile:       c.Bool("file"),
 						AllowUpdate:  c.Bool("update"),
