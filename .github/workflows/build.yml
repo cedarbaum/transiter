@@ -35,7 +35,7 @@ jobs:
 
       - name: End-to-end tests (run)
         run: docker-compose -f tests/endtoend/compose.yml up --build --exit-code-from testrunner testrunner
-    	
+
       - name: Linter
         uses: dominikh/staticcheck-action@v1.2.0
         with:
