@@ -35,8 +35,8 @@ func (c *Client) Close() error {
 	return c.conn.Close()
 }
 
-func (c *Client) DeleteSystem(ctx context.Context, systemId string) error {
-	req := api.DeleteSystemRequest{SystemId: systemId}
+func (c *Client) DeleteSystem(ctx context.Context, systemID string) error {
+	req := api.DeleteSystemRequest{SystemId: systemID}
 	_, err := c.adminClient.DeleteSystem(ctx, &req)
 	return err
 }
@@ -97,9 +97,9 @@ func (c *Client) InstallSystem(ctx context.Context, args InstallSystemArgs) erro
 	}
 }
 
-func (c *Client) UpdateFeed(ctx context.Context, systemId, feedId string) error {
+func (c *Client) UpdateFeed(ctx context.Context, systemID, feedId string) error {
 	_, err := c.adminClient.UpdateFeed(ctx, &api.UpdateFeedRequest{
-		SystemId: systemId,
+		SystemId: systemID,
 		FeedId:   feedId,
 	})
 	return err

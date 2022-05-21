@@ -19,37 +19,37 @@ import (
 	"github.com/jamespfennell/transiter/internal/update/static"
 )
 
-func CreateAndRun(ctx context.Context, pool *pgxpool.Pool, systemId, feedId string) error {
+func CreateAndRun(ctx context.Context, pool *pgxpool.Pool, systemID, feedId string) error {
 	var updatePk int64
 	if err := pool.BeginTxFunc(ctx, pgx.TxOptions{}, func(tx pgx.Tx) error {
 		var err error
-		updatePk, err = CreateInExistingTx(ctx, db.New(tx), systemId, feedId)
+		updatePk, err = CreateInExistingTx(ctx, db.New(tx), systemID, feedId)
 		return err
 	}); err != nil {
 		return err
 	}
 	// TODO: mark update as IN_PROGRESS / FAILED / etc
 	return pool.BeginTxFunc(ctx, pgx.TxOptions{}, func(tx pgx.Tx) error {
-		return RunInExistingTx(ctx, db.New(tx), systemId, updatePk)
+		return RunInExistingTx(ctx, db.New(tx), systemID, updatePk)
 	})
 }
 
-func CreateAndRunInExistingTx(ctx context.Context, querier db.Querier, systemId, feedId string) error {
-	updatePk, err := CreateInExistingTx(ctx, querier, systemId, feedId)
+func CreateAndRunInExistingTx(ctx context.Context, querier db.Querier, systemID, feedId string) error {
+	updatePk, err := CreateInExistingTx(ctx, querier, systemID, feedId)
 	if err != nil {
 		return err
 	}
-	return RunInExistingTx(ctx, querier, systemId, updatePk)
+	return RunInExistingTx(ctx, querier, systemID, updatePk)
 }
 
-func CreateInExistingTx(ctx context.Context, querier db.Querier, systemId, feedId string) (int64, error) {
-	log.Printf("Creating update for %s/%s\n", systemId, feedId)
+func CreateInExistingTx(ctx context.Context, querier db.Querier, systemID, feedId string) (int64, error) {
+	log.Printf("Creating update for %s/%s\n", systemID, feedId)
 	feed, err := querier.GetFeedInSystem(ctx, db.GetFeedInSystemParams{
-		SystemID: systemId,
+		SystemID: systemID,
 		FeedID:   feedId,
 	})
 	if err != nil {
-		return 0, errors.NewNotFoundError(fmt.Sprintf("unknown feed %s/%s", systemId, feedId))
+		return 0, errors.NewNotFoundError(fmt.Sprintf("unknown feed %s/%s", systemID, feedId))
 	}
 	return querier.InsertFeedUpdate(ctx, db.InsertFeedUpdateParams{
 		FeedPk: feed.Pk,
@@ -57,7 +57,7 @@ func CreateInExistingTx(ctx context.Context, querier db.Querier, systemId, feedI
 	})
 }
 
-func RunInExistingTx(ctx context.Context, querier db.Querier, systemId string, updatePk int64) error {
+func RunInExistingTx(ctx context.Context, querier db.Querier, systemID string, updatePk int64) error {
 	feed, err := querier.GetFeedForUpdate(ctx, updatePk)
 	if err != nil {
 		log.Printf("Error update for pk=%d\n", updatePk)
@@ -67,7 +67,7 @@ func RunInExistingTx(ctx context.Context, querier db.Querier, systemId string, u
 	if err != nil {
 		return fmt.Errorf("failed to parse feed config in the DB: %w", err)
 	}
-	content, err := getFeedContent(ctx, systemId, feedConfig)
+	content, err := getFeedContent(ctx, systemID, feedConfig)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func RunInExistingTx(ctx context.Context, querier db.Querier, systemId string, u
 	}
 }
 
-func getFeedContent(ctx context.Context, systemId string, feedConfig *config.FeedConfig) ([]byte, error) {
+func getFeedContent(ctx context.Context, systemID string, feedConfig *config.FeedConfig) ([]byte, error) {
 	client := http.Client{
 		Timeout: 5 * time.Second,
 	}
@@ -119,7 +119,7 @@ func getFeedContent(ctx context.Context, systemId string, feedConfig *config.Fee
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP request for %s/%s returned non-ok status %s", systemId, feedConfig.ID, resp.Status)
+		return nil, fmt.Errorf("HTTP request for %s/%s returned non-ok status %s", systemID, feedConfig.ID, resp.Status)
 	}
 	return io.ReadAll(resp.Body)
 }

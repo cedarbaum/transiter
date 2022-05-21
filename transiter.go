@@ -165,13 +165,13 @@ func main() {
 							if len(feedAndSystemIds) != 2 {
 								return fmt.Errorf("must provide the ID of the feed to update in the form <system_id>/<feed_id>")
 							}
-							systemId := strings.TrimSuffix(feedAndSystemIds[0], "/")
+							systemID := strings.TrimSuffix(feedAndSystemIds[0], "/")
 							feedId := feedAndSystemIds[1]
-							if systemId == "" || feedId == "" {
+							if systemID == "" || feedId == "" {
 								return fmt.Errorf("must provide the ID of the feed to update in the form <system_id>/<feed_id>")
 							}
 							return clientAction(func(ctx context.Context, client *client.Client) error {
-								return client.UpdateFeed(ctx, systemId, feedId)
+								return client.UpdateFeed(ctx, systemID, feedId)
 							})(c)
 						},
 					},

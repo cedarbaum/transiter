@@ -149,11 +149,11 @@ func (s *Service) InstallOrUpdateSystem(ctx context.Context, req *api.InstallOrU
 	return &api.InstallOrUpdateSystemReply{}, nil
 }
 
-func beginSystemInstall(ctx context.Context, querier db.Querier, systemId string, systemName string, installOnly bool) (bool, error) {
-	system, err := querier.GetSystem(ctx, systemId)
+func beginSystemInstall(ctx context.Context, querier db.Querier, systemID string, systemName string, installOnly bool) (bool, error) {
+	system, err := querier.GetSystem(ctx, systemID)
 	if err == pgx.ErrNoRows {
 		if _, err = querier.InsertSystem(ctx, db.InsertSystemParams{
-			ID:     systemId,
+			ID:     systemID,
 			Name:   systemName,
 			Status: constants.Installing,
 		}); err != nil {
@@ -175,8 +175,8 @@ func beginSystemInstall(ctx context.Context, querier db.Querier, systemId string
 	return true, nil
 }
 
-func performSystemInstall(ctx context.Context, querier db.Querier, systemId string, config *config.SystemConfig) error {
-	system, err := querier.GetSystem(ctx, systemId)
+func performSystemInstall(ctx context.Context, querier db.Querier, systemID string, config *config.SystemConfig) error {
+	system, err := querier.GetSystem(ctx, systemID)
 	if err != nil {
 		return err
 	}
@@ -225,7 +225,7 @@ func performSystemInstall(ctx context.Context, querier db.Querier, systemId stri
 			})
 		}
 		if newFeed.RequiredForInstall {
-			if err := update.CreateAndRunInExistingTx(ctx, querier, systemId, newFeed.ID); err != nil {
+			if err := update.CreateAndRunInExistingTx(ctx, querier, systemID, newFeed.ID); err != nil {
 				return err
 			}
 		}
@@ -236,8 +236,8 @@ func performSystemInstall(ctx context.Context, querier db.Querier, systemId stri
 	return nil
 }
 
-func finishSystemInstall(ctx context.Context, querier db.Querier, systemId string, installErr error) error {
-	system, err := querier.GetSystem(ctx, systemId)
+func finishSystemInstall(ctx context.Context, querier db.Querier, systemID string, installErr error) error {
+	system, err := querier.GetSystem(ctx, systemID)
 	if err != nil {
 		return err
 	}
