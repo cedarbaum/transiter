@@ -1,4 +1,4 @@
-// Package admin contains the implementation of the Transiter admin service.
+// Package admin contains the implementation of the Transiter admin API.
 package admin
 
 import (
@@ -16,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/jamespfennell/transiter/config"
-	"github.com/jamespfennell/transiter/db/constants"
+	"github.com/jamespfennell/transiter/internal/db/constants"
 	"github.com/jamespfennell/transiter/internal/gen/api"
 	"github.com/jamespfennell/transiter/internal/gen/db"
 	"github.com/jamespfennell/transiter/internal/public/errors"
@@ -25,11 +25,10 @@ import (
 	"github.com/jamespfennell/transiter/internal/update"
 )
 
-// Service implements the Transiter admin service.
+// Service implements the Transiter admin API.
 type Service struct {
 	pool      *pgxpool.Pool
 	scheduler *scheduler.Scheduler
-	api.UnimplementedTransiterAdminServer
 }
 
 func New(pool *pgxpool.Pool, scheduler *scheduler.Scheduler) *Service {
@@ -80,7 +79,7 @@ func (s *Service) InstallOrUpdateSystem(ctx context.Context, req *api.InstallOrU
 		var rawConfig []byte
 		switch s := c.YamlConfig.Source.(type) {
 		case *api.YamlConfig_Url:
-			rawConfig, err = getRawSystemConfigFromUrl(s.Url)
+			rawConfig, err = getRawSystemConfigFromURL(s.Url)
 			if err != nil {
 				return nil, err
 			}
@@ -280,7 +279,7 @@ func (s *Service) DeleteSystem(ctx context.Context, req *api.DeleteSystemRequest
 	return &api.DeleteSystemReply{}, nil
 }
 
-func getRawSystemConfigFromUrl(url string) ([]byte, error) {
+func getRawSystemConfigFromURL(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read transit system config from URL %q: %w", url, err)

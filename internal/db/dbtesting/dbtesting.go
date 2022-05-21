@@ -11,8 +11,8 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/jamespfennell/transiter/db/constants"
 	"github.com/jamespfennell/transiter/db/schema"
+	"github.com/jamespfennell/transiter/internal/db/constants"
 	"github.com/jamespfennell/transiter/internal/db/dbwrappers"
 	"github.com/jamespfennell/transiter/internal/gen/db"
 )
