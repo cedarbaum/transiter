@@ -1,3 +1,4 @@
+// Package dbtesting is a testing util package for running unit tests against a running database.
 package dbtesting
 
 import (

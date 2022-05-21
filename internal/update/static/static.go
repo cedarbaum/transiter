@@ -1,3 +1,4 @@
+// Package static contains the code for updating the database from a GTFS static feed.
 package static
 
 import (
@@ -14,11 +15,11 @@ import (
 )
 
 func Update(ctx context.Context, updateCtx common.UpdateContext, parsedEntities *gtfs.Static) error {
-	agencyIdToPk, err := updateAgencies(ctx, updateCtx, parsedEntities.Agencies)
+	agencyIDToPk, err := updateAgencies(ctx, updateCtx, parsedEntities.Agencies)
 	if err != nil {
 		return err
 	}
-	routeIDToPk, err := updateRoutes(ctx, updateCtx, parsedEntities.Routes, agencyIdToPk)
+	routeIDToPk, err := updateRoutes(ctx, updateCtx, parsedEntities.Routes, agencyIDToPk)
 	if err != nil {
 		return err
 	}
@@ -40,7 +41,7 @@ func Update(ctx context.Context, updateCtx common.UpdateContext, parsedEntities 
 }
 
 func updateAgencies(ctx context.Context, updateCtx common.UpdateContext, agencies []gtfs.Agency) (map[string]int64, error) {
-	idToPk, err := buildAgencyIdToPkMap(ctx, updateCtx.Querier, updateCtx.SystemPk)
+	idToPk, err := buildAgencyIDToPkMap(ctx, updateCtx.Querier, updateCtx.SystemPk)
 	if err != nil {
 		return nil, err
 	}
@@ -91,13 +92,13 @@ func updateAgencies(ctx context.Context, updateCtx common.UpdateContext, agencie
 	return idToPk, nil
 }
 
-func updateRoutes(ctx context.Context, updateCtx common.UpdateContext, routes []gtfs.Route, agencyIdToPk map[string]int64) (map[string]int64, error) {
+func updateRoutes(ctx context.Context, updateCtx common.UpdateContext, routes []gtfs.Route, agencyIDToPk map[string]int64) (map[string]int64, error) {
 	idToPk, err := buildRouteIDToPkMap(ctx, updateCtx.Querier, updateCtx.SystemPk)
 	if err != nil {
 		return nil, err
 	}
 	for _, route := range routes {
-		agencyPk, ok := agencyIdToPk[route.Agency.Id]
+		agencyPk, ok := agencyIDToPk[route.Agency.Id]
 		if !ok {
 			log.Printf("no agency %q in the database; skipping route %q", route.Agency.Id, route.Id)
 			continue
@@ -263,7 +264,7 @@ func updateTransfers(ctx context.Context, updateCtx common.UpdateContext, transf
 	return nil
 }
 
-func buildAgencyIdToPkMap(ctx context.Context, querier db.Querier, systemPk int64) (map[string]int64, error) {
+func buildAgencyIDToPkMap(ctx context.Context, querier db.Querier, systemPk int64) (map[string]int64, error) {
 	idToPk := map[string]int64{}
 	rows, err := querier.MapAgencyPkToIdInSystem(ctx, systemPk)
 	if err != nil {

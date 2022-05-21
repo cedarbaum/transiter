@@ -1,3 +1,4 @@
+// Package update implements the feed update functionality.
 package update
 
 import (

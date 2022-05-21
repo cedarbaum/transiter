@@ -1,3 +1,4 @@
+// Package realtime contains the code for updating the database from a GTFS realtime feed.
 package realtime
 
 import (
@@ -91,7 +92,7 @@ func updateTrips(ctx context.Context, updateCtx common.UpdateContext, trips []gt
 		}
 		serviceMapTrip := servicemaps.Trip{
 			RoutePk:     routePk,
-			DirectionId: convert.DirectionID(trip.ID.DirectionID),
+			DirectionID: convert.DirectionID(trip.ID.DirectionID),
 		}
 		for _, stopTime := range trip.StopTimeUpdates {
 			if stopTime.StopID == nil {
@@ -193,7 +194,7 @@ func updateTrips(ctx context.Context, updateCtx common.UpdateContext, trips []gt
 		}
 		oldServiceMapTrips = append(oldServiceMapTrips, servicemaps.Trip{
 			RoutePk:     trip.RoutePk,
-			DirectionId: trip.DirectionID,
+			DirectionID: trip.DirectionID,
 			StopPks:     stopPks,
 		})
 	}
