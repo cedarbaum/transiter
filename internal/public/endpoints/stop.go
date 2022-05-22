@@ -351,6 +351,6 @@ func convertGpsData(n pgtype.Numeric) *float64 {
 		return nil
 	}
 	var r float64
-	n.AssignTo(&r)
+	_ = n.AssignTo(&r)
 	return &r
 }
