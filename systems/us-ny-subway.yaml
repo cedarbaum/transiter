@@ -21,7 +21,12 @@ feeds:
         - strategy: DEFAULT
           stopID1: "B08"  # Lexington Av/63rd St
           stopID2: "R11"  # Lexington Av/59th St
-        
+
+  - id: stopheadsignrules
+    requiredForInstall: true
+    url: 'https://atisdata.s3.amazonaws.com/Station/Stations.csv'
+    parser: NYCT_STOP_HEADSIGN_RULES
+
   - id: L
     periodicUpdateEnabled: true
     periodicUpdatePeriod: 5s

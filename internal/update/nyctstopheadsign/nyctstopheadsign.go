@@ -7,6 +7,10 @@ import (
 	"encoding/csv"
 	"fmt"
 
+	"github.com/jamespfennell/gtfs"
+	"github.com/jamespfennell/transiter/internal/convert"
+	"github.com/jamespfennell/transiter/internal/db/dbwrappers"
+	"github.com/jamespfennell/transiter/internal/gen/db"
 	"github.com/jamespfennell/transiter/internal/update/common"
 )
 
@@ -19,9 +23,77 @@ func ParseAndUpdate(ctx context.Context, updateCtx common.UpdateContext, content
 	if len(records) == 0 {
 		return fmt.Errorf("file contains no header row")
 	}
-	m := map[string]int{}
-	for i, colHeader := range records[0] {
-		m[colHeader] = i
+	stopIDCol := -1
+	northHeadsignCol := -1
+	southHeadsignCol := -1
+	for i, header := range records[0] {
+		switch header {
+		case "GTFS Stop ID":
+			stopIDCol = i
+		case "North Direction Label":
+			northHeadsignCol = i
+		case "South Direction Label":
+			southHeadsignCol = i
+		}
+	}
+	if stopIDCol < 0 {
+		return fmt.Errorf("CSV file missing stop ID column")
+	}
+	if northHeadsignCol < 0 {
+		return fmt.Errorf("CSV file missing north headsign/label column")
+	}
+	if southHeadsignCol < 0 {
+		return fmt.Errorf("CSV file missing south headsign/label column")
+	}
+	var rules []rule
+	for _, row := range records[1:] {
+		rules = append(rules, rule{
+			stopID:      row[stopIDCol],
+			directionID: gtfs.DirectionIDFalse,
+			headsign:    row[northHeadsignCol],
+		})
+		rules = append(rules, rule{
+			stopID:      row[stopIDCol],
+			directionID: gtfs.DirectionIDTrue,
+			headsign:    row[southHeadsignCol],
+		})
+	}
+	if err := updateCtx.Querier.DeleteStopHeadsignRules(ctx, updateCtx.FeedPk); err != nil {
+		return err
+	}
+	stopIDsSet := map[string]bool{}
+	var stopIDs []string
+	for _, rule := range rules {
+		if stopIDsSet[rule.stopID] {
+			continue
+		}
+		stopIDsSet[rule.stopID] = true
+		stopIDs = append(stopIDs, rule.stopID)
+	}
+	stopIDToPk, err := dbwrappers.MapStopIDToPkInSystem(ctx, updateCtx.Querier, updateCtx.SystemPk, stopIDs)
+	if err != nil {
+		return err
+	}
+	for i, rule := range rules {
+		stopPk, ok := stopIDToPk[rule.stopID]
+		if !ok {
+			continue
+		}
+		if err := updateCtx.Querier.InsertStopHeadSignRule(ctx, db.InsertStopHeadSignRuleParams{
+			SourcePk:    updateCtx.UpdatePk,
+			Priority:    int32(i),
+			StopPk:      stopPk,
+			DirectionID: convert.DirectionID(rule.directionID),
+			Headsign:    rule.headsign,
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+type rule struct {
+	stopID      string
+	directionID gtfs.DirectionID
+	headsign    string
 }

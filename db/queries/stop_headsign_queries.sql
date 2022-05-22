@@ -1,13 +1,11 @@
-
-
--- InsertStopHeadSignRule :exec
+-- name: InsertStopHeadSignRule :exec
 INSERT INTO stop_headsign_rule
     (source_pk, priority, stop_pk, direction_id, track, headsign)
 VALUES
     (sqlc.arg(source_pk), sqlc.arg(priority), sqlc.arg(stop_pk), sqlc.arg(direction_id),
      sqlc.arg(track), sqlc.arg(headsign));
 
--- DeleteStopHeadsignRules :exec
+-- name: DeleteStopHeadsignRules :exec
 DELETE FROM stop_headsign_rule
 USING feed_update
 WHERE feed_update.pk = stop_headsign_rule.source_pk
