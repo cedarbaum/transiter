@@ -72,6 +72,7 @@ func Run(args RunArgs) error {
 
 	wg.Add(1)
 	go func() {
+		defer cancelFunc()
 		scheduler.Run(ctx, pool)
 		wg.Done()
 	}()

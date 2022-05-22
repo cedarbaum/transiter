@@ -72,18 +72,18 @@ func GetRouteInSystem(ctx context.Context, r *Context, req *api.GetRouteInSystem
 	if err != nil {
 		return nil, err
 	}
-	groupIDToServiceMap := map[string]*api.ServiceMapForRoute{}
+	groupIdToServiceMap := map[string]*api.ServiceMapForRoute{}
 	for _, row := range serviceMapRows {
-		if _, ok := groupIDToServiceMap[row.GroupID]; !ok {
-			groupIDToServiceMap[row.GroupID] = &api.ServiceMapForRoute{
+		if _, ok := groupIdToServiceMap[row.GroupID]; !ok {
+			groupIdToServiceMap[row.GroupID] = &api.ServiceMapForRoute{
 				GroupId: row.GroupID,
 			}
 		}
 		if !row.StopID.Valid {
 			continue
 		}
-		groupIDToServiceMap[row.GroupID].Stops = append(
-			groupIDToServiceMap[row.GroupID].Stops,
+		groupIdToServiceMap[row.GroupID].Stops = append(
+			groupIdToServiceMap[row.GroupID].Stops,
 			&api.StopPreview{
 				Id:   row.StopID.String,
 				Name: row.StopName.String,
@@ -92,7 +92,7 @@ func GetRouteInSystem(ctx context.Context, r *Context, req *api.GetRouteInSystem
 		)
 	}
 	serviceMapsReply := []*api.ServiceMapForRoute{}
-	for _, serviceMap := range groupIDToServiceMap {
+	for _, serviceMap := range groupIdToServiceMap {
 		serviceMapsReply = append(serviceMapsReply, serviceMap)
 	}
 	periodicityI, err := r.Querier.CalculatePeriodicityForRoute(ctx, route.Pk)
