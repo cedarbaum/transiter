@@ -87,7 +87,9 @@ func Run(args RunArgs) error {
 		defer cancelFunc()
 		defer wg.Done()
 		mux := newServeMux()
-		api.RegisterPublicHandlerServer(ctx, mux, publicService)
+		if err := api.RegisterPublicHandlerServer(ctx, mux, publicService); err != nil {
+			return
+		}
 		log.Printf("Public HTTP server listening on %s\n", args.PublicHTTPAddr)
 		err := http.ListenAndServe(args.PublicHTTPAddr, mux)
 		fmt.Printf("Closing public service HTTP: %s\n", err)
@@ -112,8 +114,12 @@ func Run(args RunArgs) error {
 		defer cancelFunc()
 		defer wg.Done()
 		mux := newServeMux()
-		api.RegisterPublicHandlerServer(ctx, mux, publicService)
-		api.RegisterTransiterAdminHandlerServer(ctx, mux, adminService)
+		if err := api.RegisterPublicHandlerServer(ctx, mux, publicService); err != nil {
+			return
+		}
+		if err := api.RegisterTransiterAdminHandlerServer(ctx, mux, adminService); err != nil {
+			return
+		}
 		log.Println("Admin service HTTP API listening on localhost:8082")
 		_ = http.ListenAndServe("0.0.0.0:8082", mux)
 	}()
