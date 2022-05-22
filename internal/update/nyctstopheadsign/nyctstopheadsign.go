@@ -45,15 +45,16 @@ func ParseAndUpdate(ctx context.Context, updateCtx common.UpdateContext, content
 	if southHeadsignCol < 0 {
 		return fmt.Errorf("CSV file missing south headsign/label column")
 	}
+	// TODO prepend the custom rules
 	var rules []rule
 	for _, row := range records[1:] {
 		rules = append(rules, rule{
-			stopID:      row[stopIDCol],
+			stopID:      row[stopIDCol] + "N",
 			directionID: gtfs.DirectionIDFalse,
 			headsign:    row[northHeadsignCol],
 		})
 		rules = append(rules, rule{
-			stopID:      row[stopIDCol],
+			stopID:      row[stopIDCol] + "S",
 			directionID: gtfs.DirectionIDTrue,
 			headsign:    row[southHeadsignCol],
 		})
@@ -97,3 +98,11 @@ type rule struct {
 	directionID gtfs.DirectionID
 	headsign    string
 }
+
+// TODO make the headsign nullable?
+/*
+def _clean_mta_name(mta_name):
+if mta_name.strip() == "":
+	return "(Terminating trains)"
+return mta_name.strip().replace("&", "and")
+*/
