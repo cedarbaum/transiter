@@ -1,5 +1,5 @@
-// Package nyctstopheadsign contains logic for updating the stop headsign rules from the NYCT CSV file.
-package nyctstopheadsign
+// Package nyctsubwaycsv contains logic for updating the stop headsign rules from the NYCT CSV file.
+package nyctsubwaycsv
 
 import (
 	"bytes"
