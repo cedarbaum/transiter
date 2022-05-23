@@ -14,56 +14,9 @@ import (
 )
 
 func ParseAndUpdate(ctx context.Context, updateCtx common.UpdateContext, content []byte) error {
-	csvReader := csv.NewReader(bytes.NewReader(content))
-	records, err := csvReader.ReadAll()
+	rules, err := parse(content)
 	if err != nil {
 		return err
-	}
-	if len(records) == 0 {
-		return fmt.Errorf("file contains no header row")
-	}
-	stopIDCol := -1
-	northHeadsignCol := -1
-	southHeadsignCol := -1
-	for i, header := range records[0] {
-		switch header {
-		case "GTFS Stop ID":
-			stopIDCol = i
-		case "North Direction Label":
-			northHeadsignCol = i
-		case "South Direction Label":
-			southHeadsignCol = i
-		}
-	}
-	if stopIDCol < 0 {
-		return fmt.Errorf("CSV file missing stop ID column")
-	}
-	if northHeadsignCol < 0 {
-		return fmt.Errorf("CSV file missing north headsign/label column")
-	}
-	if southHeadsignCol < 0 {
-		return fmt.Errorf("CSV file missing south headsign/label column")
-	}
-	rules := customRules()
-	customStopIDs := map[string]bool{}
-	for _, rule := range rules {
-		customStopIDs[rule.stopID] = true
-	}
-	for _, row := range records[1:] {
-		northStopID := row[stopIDCol] + "N"
-		if headsign, ok := cleanHeadsign(row[northHeadsignCol]); ok && !customStopIDs[northStopID] {
-			rules = append(rules, rule{
-				stopID:   northStopID,
-				headsign: headsign,
-			})
-		}
-		southStopID := row[stopIDCol] + "S"
-		if headsign, ok := cleanHeadsign(row[southHeadsignCol]); ok && !customStopIDs[southStopID] {
-			rules = append(rules, rule{
-				stopID:   southStopID,
-				headsign: headsign,
-			})
-		}
 	}
 	if err := updateCtx.Querier.DeleteStopHeadsignRules(ctx, updateCtx.FeedPk); err != nil {
 		return err
@@ -102,6 +55,61 @@ type rule struct {
 	stopID   string
 	track    *string
 	headsign string
+}
+
+func parse(content []byte) ([]rule, error) {
+	csvReader := csv.NewReader(bytes.NewReader(content))
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	if len(records) == 0 {
+		return nil, fmt.Errorf("subway.csv file contains no header row")
+	}
+	stopIDCol := -1
+	northHeadsignCol := -1
+	southHeadsignCol := -1
+	for i, header := range records[0] {
+		switch header {
+		case "GTFS Stop ID":
+			stopIDCol = i
+		case "North Direction Label":
+			northHeadsignCol = i
+		case "South Direction Label":
+			southHeadsignCol = i
+		}
+	}
+	if stopIDCol < 0 {
+		return nil, fmt.Errorf("subway.csv file is missing the stop ID column")
+	}
+	if northHeadsignCol < 0 {
+		return nil, fmt.Errorf("subway.csv file is missing the north headsign/label column")
+	}
+	if southHeadsignCol < 0 {
+		return nil, fmt.Errorf("subway.csv file is missing the south headsign/label column")
+	}
+	rules := customRules()
+	customStopIDs := map[string]bool{}
+	for _, rule := range rules {
+		customStopIDs[rule.stopID] = true
+	}
+	for _, row := range records[1:] {
+		northStopID := row[stopIDCol] + "N"
+		if headsign, ok := cleanHeadsign(row[northHeadsignCol]); ok && !customStopIDs[northStopID] {
+			rules = append(rules, rule{
+				stopID:   northStopID,
+				headsign: headsign,
+			})
+		}
+		southStopID := row[stopIDCol] + "S"
+		if headsign, ok := cleanHeadsign(row[southHeadsignCol]); ok && !customStopIDs[southStopID] {
+			rules = append(rules, rule{
+				stopID:   southStopID,
+				headsign: headsign,
+			})
+		}
+	}
+	return rules, nil
 }
 
 func cleanHeadsign(s string) (string, bool) {
