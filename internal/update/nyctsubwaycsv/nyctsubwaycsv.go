@@ -45,16 +45,22 @@ func ParseAndUpdate(ctx context.Context, updateCtx common.UpdateContext, content
 		return fmt.Errorf("CSV file missing south headsign/label column")
 	}
 	rules := customRules()
+	customStopIDs := map[string]bool{}
+	for _, rule := range rules {
+		customStopIDs[rule.stopID] = true
+	}
 	for _, row := range records[1:] {
-		if headsign, ok := cleanHeadsign(row[northHeadsignCol]); ok {
+		northStopID := row[stopIDCol] + "N"
+		if headsign, ok := cleanHeadsign(row[northHeadsignCol]); ok && !customStopIDs[northStopID] {
 			rules = append(rules, rule{
-				stopID:   row[stopIDCol] + "N",
+				stopID:   northStopID,
 				headsign: headsign,
 			})
 		}
-		if headsign, ok := cleanHeadsign(row[southHeadsignCol]); ok {
+		southStopID := row[stopIDCol] + "S"
+		if headsign, ok := cleanHeadsign(row[southHeadsignCol]); ok && !customStopIDs[southStopID] {
 			rules = append(rules, rule{
-				stopID:   row[stopIDCol] + "S",
+				stopID:   southStopID,
 				headsign: headsign,
 			})
 		}
