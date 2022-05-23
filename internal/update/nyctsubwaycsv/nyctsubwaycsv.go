@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"strings"
 
 	"github.com/jamespfennell/transiter/internal/db/dbwrappers"
 	"github.com/jamespfennell/transiter/internal/gen/db"
@@ -45,14 +46,18 @@ func ParseAndUpdate(ctx context.Context, updateCtx common.UpdateContext, content
 	}
 	rules := customRules()
 	for _, row := range records[1:] {
-		rules = append(rules, rule{
-			stopID:   row[stopIDCol] + "N",
-			headsign: row[northHeadsignCol],
-		})
-		rules = append(rules, rule{
-			stopID:   row[stopIDCol] + "S",
-			headsign: row[southHeadsignCol],
-		})
+		if headsign, ok := cleanHeadsign(row[northHeadsignCol]); ok {
+			rules = append(rules, rule{
+				stopID:   row[stopIDCol] + "N",
+				headsign: headsign,
+			})
+		}
+		if headsign, ok := cleanHeadsign(row[southHeadsignCol]); ok {
+			rules = append(rules, rule{
+				stopID:   row[stopIDCol] + "S",
+				headsign: headsign,
+			})
+		}
 	}
 	if err := updateCtx.Querier.DeleteStopHeadsignRules(ctx, updateCtx.FeedPk); err != nil {
 		return err
@@ -93,51 +98,106 @@ type rule struct {
 	headsign string
 }
 
-// TODO make the headsign nullable?
-/*
-def _clean_mta_name(mta_name):
-if mta_name.strip() == "":
-	return "(Terminating trains)"
-return mta_name.strip().replace("&", "and")
-*/
-const (
-	eastSideAndQueens = "East Side and Queens"
-	manhattan         = "Manhattan"
-	rockaways         = "Euclid - Lefferts - Rockaways" // To be consistent with the MTA
-	uptown            = "Uptown"
-	uptownAndTheBronx = "Uptown and The Bronx"
-	queens            = "Queens"
-)
-
-func customRules() []rule {
-	optOf := func(s string) *string {
-		return &s
+func cleanHeadsign(s string) (string, bool) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "", false
 	}
-	return []rule{
-		// Hoyt-Schermerhorn Sts station
-		{
-			stopID:   "A42N",
-			track:    optOf("E2"),
-			headsign: "Court Sq, Queens",
-		},
-		{
-			stopID:   "A42N",
-			headsign: manhattan,
-		},
-	}
+	return strings.ReplaceAll(s, "&", "and"), true
 }
 
-/*
-	  //,{MANHATTAN}
-SPECIAL_STOPS_CSV = f"""
-stop_id,track,track_name,basic_name
-A42S,E1,"Church Av, Brooklyn",{ROCKAWAYS}
-A41S,B1,Coney Island,{ROCKAWAYS}
-A25N,D4,{EAST_SIDE_AND_QUEENS},{UPTOWN_AND_THE_BRONX}
-D15N,B2,{EAST_SIDE_AND_QUEENS},{UPTOWN_AND_THE_BRONX}
-R14N,A4,{UPTOWN},{QUEENS}
-B08N,T2,{QUEENS},{UPTOWN}
-D14N,D4,{EAST_SIDE_AND_QUEENS},{UPTOWN_AND_THE_BRONX}
-D26N,A2,Franklin Avenue,{MANHATTAN}
-"""
-*/
+func customRules() []rule {
+	eastSideAndQueens := "East Side and Queens"
+	manhattan := "Manhattan"
+	rockaways := "Euclid - Lefferts - Rockaways" // To be consistent with the MTA
+	uptown := "Uptown"
+	uptownAndTheBronx := "Uptown and The Bronx"
+	queens := "Queens"
+
+	var rules []rule
+	for _, g := range []struct {
+		stopID          string
+		track           string
+		trackHeadsign   string
+		defaultHeadsign string
+	}{
+		{
+			// Hoyt-Schermerhorn Sts station (northbound)
+			stopID:          "A42N",
+			track:           "E2",
+			trackHeadsign:   "Court Sq, Queens",
+			defaultHeadsign: manhattan,
+		},
+		{
+			// Hoyt-Schermerhorn Sts station (southbound)
+			stopID:          "A42S",
+			track:           "E1",
+			trackHeadsign:   "Church Av, Brooklyn",
+			defaultHeadsign: rockaways,
+		},
+		{
+			// Jay St-Metrotech
+			stopID:          "A41S",
+			track:           "B1",
+			trackHeadsign:   "Coney Island",
+			defaultHeadsign: rockaways,
+		},
+		{
+			// 50th St
+			stopID:          "A25N",
+			track:           "D4",
+			trackHeadsign:   eastSideAndQueens,
+			defaultHeadsign: uptownAndTheBronx,
+		},
+		{
+			// 47-50 Sts-Rockefeller Ctr
+			stopID:          "D15N",
+			track:           "B2",
+			trackHeadsign:   eastSideAndQueens,
+			defaultHeadsign: uptownAndTheBronx,
+		},
+		{
+			// 57 St-7 Av
+			stopID:          "R14N",
+			track:           "A4",
+			trackHeadsign:   uptown,
+			defaultHeadsign: queens,
+		},
+
+		{
+			// Lexington Av/63 St
+			stopID:          "B08N",
+			track:           "T2",
+			trackHeadsign:   queens,
+			defaultHeadsign: uptown,
+		},
+		{
+			// 7 Av
+			stopID:          "D14N",
+			track:           "D4",
+			trackHeadsign:   eastSideAndQueens,
+			defaultHeadsign: uptownAndTheBronx,
+		},
+		{
+			// Prospect Park
+			stopID:          "D26N",
+			track:           "A2",
+			trackHeadsign:   "Franklin Avenue",
+			defaultHeadsign: manhattan,
+		},
+	} {
+		g := g
+		rules = append(rules,
+			rule{
+				stopID:   g.stopID,
+				track:    &g.track,
+				headsign: g.trackHeadsign,
+			},
+			rule{
+				stopID:   g.stopID,
+				headsign: g.defaultHeadsign,
+			},
+		)
+	}
+	return rules
+}
