@@ -850,7 +850,7 @@ func (q *Queries) ListServiceMapsForStops(ctx context.Context, stopPks []int64) 
 }
 
 const listStopHeadsignRulesForStops = `-- name: ListStopHeadsignRulesForStops :many
-SELECT pk, source_pk, priority, stop_pk, direction_id, track, headsign FROM stop_headsign_rule
+SELECT pk, source_pk, priority, stop_pk, track, headsign FROM stop_headsign_rule
 WHERE stop_pk = ANY($1::bigint[])
 ORDER BY priority ASC
 `
@@ -869,7 +869,6 @@ func (q *Queries) ListStopHeadsignRulesForStops(ctx context.Context, stopPks []i
 			&i.SourcePk,
 			&i.Priority,
 			&i.StopPk,
-			&i.DirectionID,
 			&i.Track,
 			&i.Headsign,
 		); err != nil {

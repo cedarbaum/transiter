@@ -24,19 +24,18 @@ func (q *Queries) DeleteStopHeadsignRules(ctx context.Context, sourcePk int64) e
 
 const insertStopHeadSignRule = `-- name: InsertStopHeadSignRule :exec
 INSERT INTO stop_headsign_rule
-    (source_pk, priority, stop_pk, direction_id, track, headsign)
+    (source_pk, priority, stop_pk, track, headsign)
 VALUES
-    ($1, $2, $3, $4,
-     $5, $6)
+    ($1, $2, $3,
+     $4, $5)
 `
 
 type InsertStopHeadSignRuleParams struct {
-	SourcePk    int64
-	Priority    int32
-	StopPk      int64
-	DirectionID sql.NullBool
-	Track       sql.NullString
-	Headsign    string
+	SourcePk int64
+	Priority int32
+	StopPk   int64
+	Track    sql.NullString
+	Headsign string
 }
 
 func (q *Queries) InsertStopHeadSignRule(ctx context.Context, arg InsertStopHeadSignRuleParams) error {
@@ -44,7 +43,6 @@ func (q *Queries) InsertStopHeadSignRule(ctx context.Context, arg InsertStopHead
 		arg.SourcePk,
 		arg.Priority,
 		arg.StopPk,
-		arg.DirectionID,
 		arg.Track,
 		arg.Headsign,
 	)

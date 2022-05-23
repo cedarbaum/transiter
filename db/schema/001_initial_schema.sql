@@ -71,7 +71,6 @@ CREATE TABLE stop_headsign_rule (
     source_pk BIGINT NOT NULL,
     priority integer NOT NULL,
     stop_pk BIGINT NOT NULL,
-    direction_id boolean,
     track character varying,
     headsign character varying NOT NULL
 );

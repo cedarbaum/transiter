@@ -222,13 +222,12 @@ type Stop struct {
 }
 
 type StopHeadsignRule struct {
-	Pk          int64
-	SourcePk    int64
-	Priority    int32
-	StopPk      int64
-	DirectionID sql.NullBool
-	Track       sql.NullString
-	Headsign    string
+	Pk       int64
+	SourcePk int64
+	Priority int32
+	StopPk   int64
+	Track    sql.NullString
+	Headsign string
 }
 
 type System struct {
