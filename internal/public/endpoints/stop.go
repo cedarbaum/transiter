@@ -32,13 +32,38 @@ func ListStops(ctx context.Context, r *Context, req *api.ListStopsRequest) (*api
 	if req.FirstId != nil {
 		firstID = *req.FirstId
 	}
-	stops, err := r.Querier.ListStopsInSystem(ctx, db.ListStopsInSystemParams{
-		SystemPk:               system.Pk,
-		FirstStopID:            firstID,
-		NumStops:               numStops + 1,
-		OnlyReturnSpecifiedIds: req.OnlyReturnSpecifiedIds,
-		StopIds:                req.Id,
-	})
+
+	var stops []db.Stop
+	if (req.FilterByDistance) {
+		if (req.SortMode == nil || *req.SortMode == api.ListStopsRequest_ID) {
+			stops, err = r.Querier.ListStopsInSystemGeo_ById(ctx, db.ListStopsInSystemGeo_ByIdParams{
+				SystemPk:               system.Pk,
+				OnlyReturnSpecifiedIds: req.OnlyReturnSpecifiedIds,
+				StopIds:                req.Id,
+				Latitude:               convertGpsDataForQuery(req.Latitude),
+				Longitude:              convertGpsDataForQuery(req.Longitude),
+				MaxDistance:            convertGpsDataForQuery(req.MaxDistance),
+			})
+		} else {
+			stops, err = r.Querier.ListStopsInSystemGeo_ByDistance(ctx, db.ListStopsInSystemGeo_ByDistanceParams{
+				SystemPk:               system.Pk,
+				OnlyReturnSpecifiedIds: req.OnlyReturnSpecifiedIds,
+				StopIds:                req.Id,
+				Latitude:               convertGpsDataForQuery(req.Latitude),
+				Longitude:              convertGpsDataForQuery(req.Longitude),
+				MaxDistance:            convertGpsDataForQuery(req.MaxDistance),
+			})
+		}
+	} else {
+		stops, err = r.Querier.ListStopsInSystem(ctx, db.ListStopsInSystemParams{
+			SystemPk:               system.Pk,
+			FirstStopID:            firstID,
+			NumStops:               numStops + 1,
+			OnlyReturnSpecifiedIds: req.OnlyReturnSpecifiedIds,
+			StopIds:                req.Id,
+		})
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -405,6 +430,12 @@ func convertGpsData(n pgtype.Numeric) *float64 {
 	var r float64
 	n.AssignTo(&r)
 	return &r
+}
+
+func convertGpsDataForQuery(n float64) pgtype.Numeric {
+	var num = pgtype.Numeric {}
+	num.Set(n)
+	return num;
 }
 
 func mapToSlice(m map[int64]bool) []int64 {
