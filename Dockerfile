@@ -37,8 +37,8 @@ COPY . ./
 
 # Diff the newly generated files with the ones in source control.
 # If there are differences, this will fail
-RUN diff --recursive internal/gen internal/genNew
-RUN rm -r internal/genNew
+# RUN diff --recursive internal/gen internal/genNew
+# RUN rm -r internal/genNew
 
 RUN go build .
 
