@@ -129,12 +129,15 @@ type TripUID struct {
 	RoutePk int64
 }
 
-func ListTripsForUpdate(ctx context.Context, querier db.Querier, routePks []int64) (map[TripUID]db.Trip, error) {
-	rows, err := querier.ListTrips(ctx, routePks)
+func ListTripsForUpdate(ctx context.Context, querier db.Querier, systemPk int64, routePks []int64) (map[TripUID]db.ListTripsRow, error) {
+	rows, err := querier.ListTrips(ctx, db.ListTripsParams{
+		RoutePks:        routePks,
+		SystemPk:        0,
+	})
 	if err != nil {
 		return nil, err
 	}
-	m := map[TripUID]db.Trip{}
+	m := map[TripUID]db.ListTripsRow{}
 	for _, row := range rows {
 		uid := TripUID{RoutePk: row.RoutePk, ID: row.ID}
 		m[uid] = row
@@ -159,6 +162,31 @@ func ListStopTimesForUpdate(ctx context.Context, querier db.Querier, tripUIDToPk
 		m[uid] = append(m[uid], row)
 	}
 	return m, nil
+}
+
+func MapVehicleIDAndTripIDToRow(
+	ctx context.Context,
+	querier db.Querier,
+	systemPk int64,
+	vehicleIDs []string) (map[string]db.ListVehicleIdPkTripPkGtfsHashRow, map[string]db.ListVehicleIdPkTripPkGtfsHashRow, error) {
+	rows, err := querier.ListVehicleIdPkTripPkGtfsHash(ctx, db.ListVehicleIdPkTripPkGtfsHashParams{
+		SystemPk:   systemPk,
+		VehicleIds: vehicleIDs,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	vehicleIDToRow := map[string]db.ListVehicleIdPkTripPkGtfsHashRow{}
+	tripPkToRow := map[string]db.ListVehicleIdPkTripPkGtfsHashRow{}
+
+	for _, row := range rows {
+		vehicleIDToRow[row.ID.String] = row
+		if row.TripID.Valid {
+			tripPkToRow[row.TripID.String] = row
+		}
+	}
+	return vehicleIDToRow, tripPkToRow, nil
 }
 
 func Ping(ctx context.Context, logger *slog.Logger, pool *pgxpool.Pool, numRetries int, waitBetweenPings time.Duration) error {

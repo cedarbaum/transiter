@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	ClearVehicleFeed(ctx context.Context, feedPk int64) error
 	CountAgenciesInSystem(ctx context.Context, systemPk int64) (int64, error)
 	CountFeedsInSystem(ctx context.Context, systemPk int64) (int64, error)
 	CountRoutesInSystem(ctx context.Context, systemPk int64) (int64, error)
@@ -25,6 +26,7 @@ type Querier interface {
 	DeleteStaleRoutes(ctx context.Context, arg DeleteStaleRoutesParams) error
 	DeleteStaleStops(ctx context.Context, arg DeleteStaleStopsParams) error
 	DeleteStaleTrips(ctx context.Context, arg DeleteStaleTripsParams) ([]int64, error)
+	DeleteStaleVehicles(ctx context.Context, arg DeleteStaleVehiclesParams) error
 	DeleteStopHeadsignRules(ctx context.Context, feedPk int64) error
 	DeleteSystem(ctx context.Context, pk int64) error
 	DeleteTransfers(ctx context.Context, feedPk int64) error
@@ -37,7 +39,8 @@ type Querier interface {
 	GetRoute(ctx context.Context, arg GetRouteParams) (Route, error)
 	GetStop(ctx context.Context, arg GetStopParams) (Stop, error)
 	GetSystem(ctx context.Context, id string) (System, error)
-	GetTrip(ctx context.Context, arg GetTripParams) (Trip, error)
+	GetTrip(ctx context.Context, arg GetTripParams) (GetTripRow, error)
+	GetVehicle(ctx context.Context, arg GetVehicleParams) (GetVehicleRow, error)
 	InsertAgency(ctx context.Context, arg InsertAgencyParams) (int64, error)
 	InsertAlert(ctx context.Context, arg InsertAlertParams) (int64, error)
 	InsertAlertActivePeriod(ctx context.Context, arg InsertAlertActivePeriodParams) error
@@ -55,6 +58,7 @@ type Querier interface {
 	InsertTransfer(ctx context.Context, arg InsertTransferParams) error
 	InsertTrip(ctx context.Context, arg InsertTripParams) (int64, error)
 	InsertTripStopTime(ctx context.Context, arg []InsertTripStopTimeParams) (int64, error)
+	InsertVehicle(ctx context.Context, arg InsertVehicleParams) error
 	ListActiveAlertsForAgencies(ctx context.Context, arg ListActiveAlertsForAgenciesParams) ([]ListActiveAlertsForAgenciesRow, error)
 	// ListActiveAlertsForRoutes returns preview information about active alerts for the provided routes.
 	ListActiveAlertsForRoutes(ctx context.Context, arg ListActiveAlertsForRoutesParams) ([]ListActiveAlertsForRoutesRow, error)
@@ -83,9 +87,12 @@ type Querier interface {
 	ListSystems(ctx context.Context) ([]System, error)
 	ListTransfersFromStops(ctx context.Context, fromStopPks []int64) ([]Transfer, error)
 	ListTransfersInSystem(ctx context.Context, systemPk pgtype.Int8) ([]ListTransfersInSystemRow, error)
-	ListTripStopTimesByStops(ctx context.Context, stopPks []int64) ([]ListTripStopTimesByStopsRow, error)
+	ListTripStopTimesByStops(ctx context.Context, arg ListTripStopTimesByStopsParams) ([]ListTripStopTimesByStopsRow, error)
 	ListTripStopTimesForUpdate(ctx context.Context, tripPks []int64) ([]ListTripStopTimesForUpdateRow, error)
-	ListTrips(ctx context.Context, routePks []int64) ([]Trip, error)
+	ListTrips(ctx context.Context, arg ListTripsParams) ([]ListTripsRow, error)
+	ListVehicleIdPkTripPkGtfsHash(ctx context.Context, arg ListVehicleIdPkTripPkGtfsHashParams) ([]ListVehicleIdPkTripPkGtfsHashRow, error)
+	ListVehicles(ctx context.Context, arg ListVehiclesParams) ([]ListVehiclesRow, error)
+	ListVehicles_Geographic(ctx context.Context, arg ListVehicles_GeographicParams) ([]ListVehicles_GeographicRow, error)
 	MapAgencyPkToId(ctx context.Context, systemPk int64) ([]MapAgencyPkToIdRow, error)
 	MapRouteIDToPkInSystem(ctx context.Context, arg MapRouteIDToPkInSystemParams) ([]MapRouteIDToPkInSystemRow, error)
 	MapStopIDAndPkToStationPk(ctx context.Context, arg MapStopIDAndPkToStationPkParams) ([]MapStopIDAndPkToStationPkRow, error)
@@ -106,6 +113,7 @@ type Querier interface {
 	UpdateSystemStatus(ctx context.Context, arg UpdateSystemStatusParams) error
 	UpdateTrip(ctx context.Context, arg []UpdateTripParams) *UpdateTripBatchResults
 	UpdateTripStopTime(ctx context.Context, arg UpdateTripStopTimeParams) error
+	UpdateVehicle(ctx context.Context, arg UpdateVehicleParams) error
 }
 
 var _ Querier = (*Queries)(nil)

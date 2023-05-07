@@ -67,7 +67,7 @@ func ListStops(ctx context.Context, r *Context, req *api.ListStopsRequest) (*api
 		nextID = &stops[len(stops)-1].ID
 		stops = stops[:len(stops)-1]
 	}
-	apiStops, err := buildStopsResponse(ctx, r, req.GetSystemId(), stops, req)
+	apiStops, err := buildStopsResponse(ctx, r, system, stops, req)
 	if err != nil {
 		return nil, err
 	}
@@ -100,11 +100,11 @@ func ListTransfers(ctx context.Context, r *Context, req *api.ListTransfersReques
 }
 
 func GetStop(ctx context.Context, r *Context, req *api.GetStopRequest) (*api.Stop, error) {
-	_, stop, err := getStop(ctx, r.Querier, req.SystemId, req.StopId)
+	system, stop, err := getStop(ctx, r.Querier, req.SystemId, req.StopId)
 	if err != nil {
 		return nil, err
 	}
-	apiStops, err := buildStopsResponse(ctx, r, req.SystemId, []db.Stop{stop}, req)
+	apiStops, err := buildStopsResponse(ctx, r, system, []db.Stop{stop}, req)
 	if err != nil {
 		return nil, err
 	}
@@ -118,8 +118,8 @@ type stopRequest interface {
 	GetSkipTransfers() bool
 }
 
-func buildStopsResponse(ctx context.Context, r *Context, systemID string, stops []db.Stop, req stopRequest) ([]*api.Stop, error) {
-	data, err := getRawStopData(ctx, r, stops, req)
+func buildStopsResponse(ctx context.Context, r *Context, system db.System, stops []db.Stop, req stopRequest) ([]*api.Stop, error) {
+	data, err := getRawStopData(ctx, r, system.Pk, stops, req)
 	if err != nil {
 		return nil, err
 	}
@@ -127,17 +127,17 @@ func buildStopsResponse(ctx context.Context, r *Context, systemID string, stops 
 	stopPkToApiPreview := map[int64]*api.Stop_Reference{}
 	for i := range data.allStops {
 		stop := &data.allStops[i]
-		stopPkToApiPreview[stop.Pk] = r.Reference.Stop(stop.StopID, systemID, stop.Name)
+		stopPkToApiPreview[stop.Pk] = r.Reference.Stop(stop.StopID, system.ID, stop.Name)
 	}
 	routePkToApiPreview := map[int64]*api.Route_Reference{}
 	for i := range data.allRoutes {
 		route := &data.allRoutes[i]
-		routePkToApiPreview[route.Pk] = r.Reference.Route(route.ID, systemID, route.Color)
+		routePkToApiPreview[route.Pk] = r.Reference.Route(route.ID, system.ID, route.Color)
 	}
 	stopPkToApiTransfers := buildStopPkToApiTransfers(data, stopPkToApiPreview)
 	stopPkToApiServiceMaps := buildStopPkToApiServiceMaps(data, routePkToApiPreview)
-	stopPkToApiAlerts := buildStopPkToApiAlerts(r, systemID, data)
-	stopPkToApiStopTimes := buildStopPkToApiStopsTimes(r, data, routePkToApiPreview, stopPkToApiPreview)
+	stopPkToApiAlerts := buildStopPkToApiAlerts(r, system.ID, data)
+	stopPkToApiStopTimes := buildStopPkToApiStopsTimes(r, data, routePkToApiPreview, stopPkToApiPreview, system.ID)
 	stopPkToApiHeadsignRules := buildStopPkToApiHeadsignRules(data, stopPkToApiPreview)
 	stopPkToChildren := map[int64][]*api.Stop_Reference{}
 	for stopPk, childPks := range data.stopPkToChildPks {
@@ -195,7 +195,7 @@ type rawStopData struct {
 	stopPkToChildPks      map[int64][]int64
 }
 
-func getRawStopData(ctx context.Context, r *Context, stops []db.Stop, req stopRequest) (rawStopData, error) {
+func getRawStopData(ctx context.Context, r *Context, systemPk int64, stops []db.Stop, req stopRequest) (rawStopData, error) {
 	var d rawStopData
 	var err error
 
@@ -240,7 +240,10 @@ func getRawStopData(ctx context.Context, r *Context, stops []db.Stop, req stopRe
 		}
 	}
 	if !req.GetSkipStopTimes() {
-		d.stopTimes, err = r.Querier.ListTripStopTimesByStops(ctx, allDescendentPks)
+		d.stopTimes, err = r.Querier.ListTripStopTimesByStops(ctx, db.ListTripStopTimesByStopsParams{
+			StopPks:  allDescendentPks,
+			SystemPk: systemPk,
+		})
 		if err != nil {
 			return d, err
 		}
@@ -354,7 +357,12 @@ func buildStopPkToApiAlerts(r *Context, systemID string, data rawStopData) map[i
 	return liftToAncestors(data, m)
 }
 
-func buildStopPkToApiStopsTimes(r *Context, data rawStopData, routePkToApiPreview map[int64]*api.Route_Reference, stopPkToApiPreview map[int64]*api.Stop_Reference) map[int64][]*api.StopTime {
+func buildStopPkToApiStopsTimes(
+	r *Context,
+	data rawStopData,
+	routePkToApiPreview map[int64]*api.Route_Reference,
+	stopPkToApiPreview map[int64]*api.Stop_Reference,
+	systemID string) map[int64][]*api.StopTime {
 	m := map[int64][]*api.StopTime{}
 	tripPkToDestination := map[int64]*api.Stop_Reference{}
 	for _, row := range data.tripDestinations {
@@ -373,11 +381,21 @@ func buildStopPkToApiStopsTimes(r *Context, data rawStopData, routePkToApiPrevie
 				stopTime.ID,
 				routePkToApiPreview[stopTime.RoutePk],
 				tripPkToDestination[stopTime.TripPk],
-				nil, // TODO: vehice
+				nil,
 				stopTime.DirectionID.Bool,
 			),
 			Stop: stopPkToApiPreview[stopTime.StopPk],
 		}
+		if stopTime.VehicleID.Valid {
+			apiStopTime.Trip.Vehicle = r.Reference.Vehicle(
+				stopTime.VehicleID.String,
+				systemID,
+				convert.SQLGps(stopTime.VehicleLatitude),
+				convert.SQLGps(stopTime.VehicleLongitude),
+				convert.SQLNullFloat4(stopTime.VehicleBearing),
+				convert.SQLNullTime(stopTime.VehicleUpdatedAt))
+		}
+
 		m[stopTime.StopPk] = append(m[stopTime.StopPk], apiStopTime)
 	}
 	return liftToAncestors(data, m)

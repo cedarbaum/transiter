@@ -13,7 +13,7 @@ import (
 
 const deleteStaleTrips = `-- name: DeleteStaleTrips :many
 DELETE FROM trip
-WHERE 
+WHERE
     trip.feed_pk = $1
     AND NOT trip.pk = ANY($2::bigint[])
 RETURNING trip.route_pk
@@ -96,19 +96,42 @@ func (q *Queries) GetDestinationsForTrips(ctx context.Context, tripPks []int64) 
 }
 
 const getTrip = `-- name: GetTrip :one
-SELECT pk, id, route_pk, direction_id, started_at, gtfs_hash, feed_pk FROM trip
-WHERE trip.id = $1
-    AND trip.route_pk = $2
+SELECT trip.pk, trip.id, trip.route_pk, trip.direction_id, trip.started_at, trip.gtfs_hash, trip.feed_pk,
+       vehicle.id as vehicle_id,
+       vehicle.latitude as vehicle_latitude,
+       vehicle.longitude as vehicle_longitude,
+       vehicle.bearing as vehicle_bearing,
+       vehicle.updated_at as vehicle_updated_at
+FROM trip
+LEFT JOIN vehicle ON trip.id = vehicle.trip_id AND vehicle.system_pk = $1
+WHERE trip.id = $2
+    AND trip.route_pk = $3
 `
 
 type GetTripParams struct {
-	TripID  string
-	RoutePk int64
+	SystemPk int64
+	TripID   string
+	RoutePk  int64
 }
 
-func (q *Queries) GetTrip(ctx context.Context, arg GetTripParams) (Trip, error) {
-	row := q.db.QueryRow(ctx, getTrip, arg.TripID, arg.RoutePk)
-	var i Trip
+type GetTripRow struct {
+	Pk               int64
+	ID               string
+	RoutePk          int64
+	DirectionID      pgtype.Bool
+	StartedAt        pgtype.Timestamptz
+	GtfsHash         string
+	FeedPk           int64
+	VehicleID        pgtype.Text
+	VehicleLatitude  pgtype.Numeric
+	VehicleLongitude pgtype.Numeric
+	VehicleBearing   pgtype.Float4
+	VehicleUpdatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetTrip(ctx context.Context, arg GetTripParams) (GetTripRow, error) {
+	row := q.db.QueryRow(ctx, getTrip, arg.SystemPk, arg.TripID, arg.RoutePk)
+	var i GetTripRow
 	err := row.Scan(
 		&i.Pk,
 		&i.ID,
@@ -117,6 +140,11 @@ func (q *Queries) GetTrip(ctx context.Context, arg GetTripParams) (Trip, error) 
 		&i.StartedAt,
 		&i.GtfsHash,
 		&i.FeedPk,
+		&i.VehicleID,
+		&i.VehicleLatitude,
+		&i.VehicleLongitude,
+		&i.VehicleBearing,
+		&i.VehicleUpdatedAt,
 	)
 	return i, err
 }
@@ -270,20 +298,47 @@ func (q *Queries) ListTripStopTimesForUpdate(ctx context.Context, tripPks []int6
 }
 
 const listTrips = `-- name: ListTrips :many
-SELECT pk, id, route_pk, direction_id, started_at, gtfs_hash, feed_pk FROM trip
-WHERE route_pk = ANY($1::bigint[])
+SELECT trip.pk, trip.id, trip.route_pk, trip.direction_id, trip.started_at, trip.gtfs_hash, trip.feed_pk,
+       vehicle.id as vehicle_id,
+       vehicle.latitude as vehicle_latitude,
+       vehicle.longitude as vehicle_longitude,
+       vehicle.bearing as vehicle_bearing,
+       vehicle.updated_at as vehicle_updated_at
+FROM trip
+LEFT JOIN vehicle ON trip.id = vehicle.trip_id AND vehicle.system_pk = $1
+WHERE route_pk = ANY($2::bigint[])
 ORDER BY route_pk, id
 `
 
-func (q *Queries) ListTrips(ctx context.Context, routePks []int64) ([]Trip, error) {
-	rows, err := q.db.Query(ctx, listTrips, routePks)
+type ListTripsParams struct {
+	SystemPk int64
+	RoutePks []int64
+}
+
+type ListTripsRow struct {
+	Pk               int64
+	ID               string
+	RoutePk          int64
+	DirectionID      pgtype.Bool
+	StartedAt        pgtype.Timestamptz
+	GtfsHash         string
+	FeedPk           int64
+	VehicleID        pgtype.Text
+	VehicleLatitude  pgtype.Numeric
+	VehicleLongitude pgtype.Numeric
+	VehicleBearing   pgtype.Float4
+	VehicleUpdatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) ListTrips(ctx context.Context, arg ListTripsParams) ([]ListTripsRow, error) {
+	rows, err := q.db.Query(ctx, listTrips, arg.SystemPk, arg.RoutePks)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Trip
+	var items []ListTripsRow
 	for rows.Next() {
-		var i Trip
+		var i ListTripsRow
 		if err := rows.Scan(
 			&i.Pk,
 			&i.ID,
@@ -292,6 +347,11 @@ func (q *Queries) ListTrips(ctx context.Context, routePks []int64) ([]Trip, erro
 			&i.StartedAt,
 			&i.GtfsHash,
 			&i.FeedPk,
+			&i.VehicleID,
+			&i.VehicleLatitude,
+			&i.VehicleLongitude,
+			&i.VehicleBearing,
+			&i.VehicleUpdatedAt,
 		); err != nil {
 			return nil, err
 		}
