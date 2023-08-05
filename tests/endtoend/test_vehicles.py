@@ -183,8 +183,6 @@ class TestVehicles:
 
         assert response["id"] == TRIP_ID_1
         assert response["vehicle"]["id"] == VEHICLE_ID_1
-        assert response["vehicle"]["latitude"] == VEHICLE_1_LAT
-        assert response["vehicle"]["longitude"] == VEHICLE_1_LON
 
     def test_stop_view(self, install_system_1, system_id, transiter_host,
                        source_server, stop_id_to_time, vehicles):
@@ -212,8 +210,6 @@ class TestVehicles:
         stop_time = stop_times[0]
         assert stop_time["trip"]["id"] == TRIP_ID_1
         assert stop_time["trip"]["vehicle"]["id"] == VEHICLE_ID_1
-        assert stop_time["trip"]["vehicle"]["latitude"] == VEHICLE_1_LAT
-        assert stop_time["trip"]["vehicle"]["longitude"] == VEHICLE_1_LON
 
 
 def compare_vehicles_to_resp(vehicles, resp_vehicles, expected_ids=None):

@@ -384,13 +384,7 @@ func buildStopPkToApiStopsTimes(
 			Stop: stopPkToApiPreview[stopTime.StopPk],
 		}
 		if stopTime.VehicleID.Valid {
-			apiStopTime.Trip.Vehicle = r.Reference.Vehicle(
-				stopTime.VehicleID.String,
-				systemID,
-				convert.SQLGps(stopTime.VehicleLatitude),
-				convert.SQLGps(stopTime.VehicleLongitude),
-				convert.SQLNullFloat4(stopTime.VehicleBearing),
-				convert.SQLNullTime(stopTime.VehicleUpdatedAt))
+			apiStopTime.Trip.Vehicle = r.Reference.Vehicle(stopTime.VehicleID.String, systemID)
 		}
 
 		m[stopTime.StopPk] = append(m[stopTime.StopPk], apiStopTime)

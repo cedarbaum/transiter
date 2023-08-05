@@ -78,13 +78,7 @@ func buildApiTrips(ctx context.Context, r *Context, system *db.System, route *db
 			Route:       r.Reference.Route(route.ID, system.ID, route.Color),
 		}
 		if trip.VehicleID.Valid {
-			reply.Vehicle = r.Reference.Vehicle(
-				trip.VehicleID.String,
-				system.ID,
-				convert.SQLGps(trip.VehicleLatitude),
-				convert.SQLGps(trip.VehicleLongitude),
-				convert.SQLNullFloat4(trip.VehicleBearing),
-				convert.SQLNullTime(trip.VehicleUpdatedAt))
+			reply.Vehicle = r.Reference.Vehicle(trip.VehicleID.String, system.ID)
 		}
 		for _, stopTime := range stopTimes {
 			reply.StopTimes = append(reply.StopTimes, &api.StopTime{

@@ -858,10 +858,6 @@ Reference is the reference type for the vehicle resource.
 | ----- | ---- | ----------- |
 | id | string | 
 | resource | [Resource](public_resources.md#Resource) | 
-| latitude | double | 
-| longitude | double | 
-| bearing | float | 
-| updated_at | int64 | 
 
 
 

@@ -136,20 +136,10 @@ func (h Generator) TransfersHref(systemID string) *string {
 	return h.generateHref("systems", systemID, "transfers")
 }
 
-func (h Generator) Vehicle(
-	id string,
-	systemID string,
-	latitude *float64,
-	longitude *float64,
-	bearing *float32,
-	updatedAt *int64) *api.Vehicle_Reference {
+func (h Generator) Vehicle(id string, systemID string) *api.Vehicle_Reference {
 	return &api.Vehicle_Reference{
-		Id:        id,
-		Resource:  h.generateResource("systems", systemID, "vehicles", id),
-		Latitude:  latitude,
-		Longitude: longitude,
-		Bearing:   bearing,
-		UpdatedAt: updatedAt,
+		Id:       id,
+		Resource: h.generateResource("systems", systemID, "vehicles", id),
 	}
 }
 

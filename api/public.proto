@@ -955,10 +955,6 @@ message Vehicle {
   message Reference {
     string id = 1;
     Resource resource = 2;
-    optional double latitude = 3;
-    optional double longitude = 4;
-    optional float bearing = 5;
-    optional int64 updated_at = 6;
   }
 }
 
