@@ -787,6 +787,7 @@ Enum describing the possible statuses of a system.
 | direction_id | bool | 
 | stop_times | [StopTime](public_resources.md#StopTime) | 
 | shape | [Shape.Reference](public_resources.md#Shape.Reference) | 
+| headsign | string | Headsign of the trip inferred from static GTFS data.
 
 
 

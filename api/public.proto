@@ -923,6 +923,9 @@ message Trip {
 
   optional Shape.Reference shape = 8;
 
+  // Headsign of the trip inferred from static GTFS data.
+  optional string headsign = 9;
+
   // Reference is the reference type for the trip resource.
   message Reference {
     string id = 1;

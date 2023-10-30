@@ -14,11 +14,14 @@ SELECT lss.trip_pk, stop.pk destination_pk
     ON trip_stop_time.stop_pk = stop.pk;
 
 -- name: ListTrips :many
-WITH shapes_for_scheduled_trips_in_system AS (
-  SELECT scheduled_trip.id as trip_id, shape.id as shape_id
-  FROM shape
-  INNER JOIN scheduled_trip ON shape.pk = scheduled_trip.shape_pk
-  WHERE shape.system_pk = sqlc.arg(system_pk)
+WITH static_trip_data AS (
+  SELECT scheduled_trip.id as trip_id,
+         shape.id as shape_id,
+         scheduled_trip.headsign as headsign
+  FROM scheduled_trip
+  LEFT JOIN shape ON scheduled_trip.shape_pk = shape.pk
+  INNER JOIN scheduled_service ON scheduled_trip.service_pk = scheduled_service.pk
+  WHERE scheduled_service.system_pk = sqlc.arg(system_pk)
 )
 SELECT trip.*,
        vehicle.id as vehicle_id,
@@ -26,11 +29,12 @@ SELECT trip.*,
        vehicle.longitude as vehicle_longitude,
        vehicle.bearing as vehicle_bearing,
        vehicle.updated_at as vehicle_updated_at,
-       shapes_for_scheduled_trips_in_system.shape_id as shape_id
+       static_trip_data.shape_id as shape_id,
+       static_trip_data.headsign as headsign
 FROM trip
 LEFT JOIN vehicle ON trip.pk = vehicle.trip_pk
-LEFT JOIN shapes_for_scheduled_trips_in_system
-     ON trip.id = shapes_for_scheduled_trips_in_system.trip_id
+LEFT JOIN static_trip_data
+     ON trip.id = static_trip_data.trip_id
 WHERE trip.route_pk = ANY(sqlc.arg(route_pks)::bigint[])
 ORDER BY trip.route_pk, trip.id;
 
@@ -42,11 +46,14 @@ WHERE trip.id = ANY(sqlc.arg(trip_ids)::text[])
     AND feed.system_pk = sqlc.arg(system_pk);
 
 -- name: GetTrip :one
-WITH shapes_for_scheduled_trips_in_system AS (
-  SELECT scheduled_trip.id as trip_id, shape.id as shape_id
-  FROM shape
-  INNER JOIN scheduled_trip ON shape.pk = scheduled_trip.shape_pk
-  WHERE shape.system_pk = sqlc.arg(system_pk)
+WITH static_trip_data AS (
+  SELECT scheduled_trip.id as trip_id,
+         shape.id as shape_id,
+         scheduled_trip.headsign as headsign
+  FROM scheduled_trip
+  LEFT JOIN shape ON scheduled_trip.shape_pk = shape.pk
+  INNER JOIN scheduled_service ON scheduled_trip.service_pk = scheduled_service.pk
+  WHERE scheduled_service.system_pk = sqlc.arg(system_pk)
 )
 SELECT trip.*,
        vehicle.id as vehicle_id,
@@ -54,11 +61,12 @@ SELECT trip.*,
        vehicle.longitude as vehicle_longitude,
        vehicle.bearing as vehicle_bearing,
        vehicle.updated_at as vehicle_updated_at,
-       shapes_for_scheduled_trips_in_system.shape_id as shape_id
+       static_trip_data.shape_id as shape_id,
+       static_trip_data.headsign as headsign
 FROM trip
 LEFT JOIN vehicle ON trip.pk = vehicle.trip_pk
-LEFT JOIN shapes_for_scheduled_trips_in_system
-     ON trip.id = shapes_for_scheduled_trips_in_system.trip_id
+LEFT JOIN static_trip_data
+     ON trip.id = static_trip_data.trip_id
 WHERE trip.id = sqlc.arg(trip_id)
     AND trip.route_pk = sqlc.arg(route_pk);
 

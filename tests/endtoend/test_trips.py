@@ -170,6 +170,9 @@ class TestTrip:
         assert expected_past_stop_ids == actual_past_stop_ids
         assert expected_future_stop_ids == actual_future_stop_ids
 
+        # headsign from the GTFS static feed
+        assert "Rockaway Park" == response["headsign"]
+
 
 def build_gtfs_rt_message(
     current_time, stop_id_to_time, use_stop_sequences, direction_id=True

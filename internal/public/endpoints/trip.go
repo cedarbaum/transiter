@@ -62,6 +62,7 @@ func GetTrip(ctx context.Context, r *Context, req *api.GetTripRequest) (*api.Tri
 		VehicleLatitude:  trip.VehicleLatitude,
 		VehicleLongitude: trip.VehicleLongitude,
 		ShapeID:          trip.ShapeID,
+		Headsign:         trip.Headsign,
 	}})
 	if err != nil {
 		return nil, err
@@ -83,6 +84,7 @@ func buildApiTrips(ctx context.Context, r *Context, system *db.System, route *db
 			StartedAt:   convert.SQLNullTime(trip.StartedAt),
 			Route:       r.Reference.Route(route.ID, system.ID, route.Color),
 			Shape:       nullShapeReference(r, trip.ShapeID, system.ID),
+			Headsign:    convert.SQLNullString(trip.Headsign),
 		}
 		if trip.VehicleID.Valid {
 			reply.Vehicle = r.Reference.Vehicle(trip.VehicleID.String, system.ID)
