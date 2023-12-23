@@ -7,4 +7,4 @@ feeds:
 
   - id: gtfsrealtime
     type: GTFS_REALTIME
-    url: 'https://path.transitdata.nyc/gtfsrt'
+    url: 'https://transiter-luko2.ondigitalocean.app/path-train-gtfs-realtime/gtfsrt'
