@@ -7,4 +7,4 @@ feeds:
 
   - id: gtfsrealtime
     type: GTFS_REALTIME
-    url: 'https://transiter-luko2.ondigitalocean.app/path-train-gtfs-realtime/gtfsrt'
+    url: 'path-train-gtfs-realtime:8080/gtfsrt'
