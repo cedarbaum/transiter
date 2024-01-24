@@ -7,4 +7,4 @@ feeds:
 
   - id: gtfsrealtime
     type: GTFS_REALTIME
-    url: 'http://path-train-gtfs-realtime:8080/gtfsrt'
+    url: 'https://path2.transitdata.nyc/gtfsrt'
